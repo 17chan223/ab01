@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>アバター作成アプリ</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f0f0f5;
+        }
+        #appContainer {
+            display: flex;
+            max-width: 800px;
+            margin: 20px auto;
+            border: 1px solid #ccc;
+            background-color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        #canvasContainer {
+            flex: 2;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #controls {
+            flex: 1;
+            padding: 20px;
+            border-left: 1px solid #eee;
+            text-align: left;
+        }
+        canvas {
+            border: 1px solid #333;
+            background-color: #e0e0e0;
+        }
+        .control-group {
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px dashed #ddd;
+        }
+        .control-group h3 {
+            margin-top: 0;
+            font-size: 1.2em;
+            color: #333;
+        }
+        .control-group button {
+            padding: 8px 12px;
+            margin: 4px;
+            cursor: pointer;
+            border: 1px solid #007bff;
+            background-color: white;
+            color: #007bff;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        .control-group button:hover {
+            background-color: #007bff;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <h1> シンプルアバタークリエイター</h1>
+
+    <div id="appContainer">
+        
+        <div id="canvasContainer">
+            <canvas id="avatarCanvas" width="300" height="300"></canvas>
+        </div>
+
+        <div id="controls">
+            <h2>カスタマイズ</h2>
+
+            <div class="control-group">
+                <h3>頭の色</h3>
+                <button onclick="changePart('headColor', 'orange')">オレンジ</button>
+                <button onclick="changePart('headColor', '#ffdfc4')">肌色</button>
+                <button onclick="changePart('headColor', '#7a4a2b')">茶色</button>
+            </div>
+
+            <div class="control-group">
+                <h3>目の形</h3>
+                <button onclick="changePart('eyeShape', 'circle')">丸</button>
+                <button onclick="changePart('eyeShape', 'square')">四角</button>
+                <button onclick="changePart('eyeShape', 'line')">線</button>
+            </div>
+
+            <div class="control-group">
+                <h3>口の形</h3>
+                <button onclick="changePart('mouthShape', 'line')">直線</button>
+                <button onclick="changePart('mouthShape', 'smile')">笑顔</button>
+                <button onclick="changePart('mouthShape', 'sad')">悲しい</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const canvas = document.getElementById('avatarCanvas');
+        const ctx = canvas.getContext('2d');
+        const CANVAS_SIZE = 300;
+        
+        // ★★★ アバターの状態を保持するオブジェクト ★★★
+        let avatarState = {
+            headColor: '#ffdfc4', // 初期の色 (肌色)
+            eyeShape: 'circle',   // 初期は丸
+            mouthShape: 'line',   // 初期は直線
+            
+            // 各パーツの座標・サイズ設定 (固定値)
+            head: { x: CANVAS_SIZE / 2, y: CANVAS_SIZE / 2 - 30, radius: 80 },
+            eye: { offset: 30, y: CANVAS_SIZE / 2 - 50, size: 10 },
+            mouth: { x: CANVAS_SIZE / 2, y: CANVAS_SIZE / 2 + 20, width: 40, height: 10 }
+        };
+
+        // --- パーツ変更関数 ---
+        function changePart(part, value) {
+            avatarState[part] = value;
+            redrawAvatar();
+        }
+
+        // --- アバター描画関数 ---
+        function redrawAvatar() {
+            // 画面をクリア
+            ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+            
+            // --- 1. 頭部 (Head) の描画 ---
+            ctx.fillStyle = avatarState.headColor;
+            ctx.beginPath();
+            ctx.arc(avatarState.head.x, avatarState.head.y, avatarState.head.radius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // --- 2. 目 (Eyes) の描画 ---
+            ctx.fillStyle = 'black';
+            
+            // 左目
+            drawEye(avatarState.head.x - avatarState.eye.offset, avatarState.eye.y, avatarState.eye.size, avatarState.eyeShape);
+            // 右目
+            drawEye(avatarState.head.x + avatarState.eye.offset, avatarState.eye.y, avatarState.eye.size, avatarState.eyeShape);
+
+            // --- 3. 口 (Mouth) の描画 ---
+            drawMouth(avatarState.mouth.x, avatarState.mouth.y, avatarState.mouth.width, avatarState.mouthShape);
+        }
+
+        // --- 目を描くヘルパー関数 ---
+        function drawEye(x, y, size, shape) {
+            ctx.beginPath();
+            if (shape === 'circle') {
+                ctx.arc(x, y, size * 0.7, 0, Math.PI * 2);
+                ctx.fill();
+            } else if (shape === 'square') {
+                ctx.fillRect(x - size, y - size, size * 2, size * 2);
+            } else if (shape === 'line') {
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = 'black';
+                ctx.moveTo(x - size, y);
+                ctx.lineTo(x + size, y);
+                ctx.stroke();
+                ctx.lineWidth = 2; // 元に戻す
+            }
+        }
+        
+        // --- 口を描くヘルパー関数 ---
+        function drawMouth(x, y, width, shape) {
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            
+            if (shape === 'line') {
+                ctx.moveTo(x - width / 2, y);
+                ctx.lineTo(x + width / 2, y);
+                ctx.stroke();
+            } else if (shape === 'smile') {
+                // 笑顔 (上に凸の円弧)
+                ctx.arc(x, y - width / 4, width / 2, 0, Math.PI);
+                ctx.stroke();
+            } else if (shape === 'sad') {
+                // 悲しい顔 (下に凸の円弧)
+                ctx.arc(x, y + width / 4, width / 2, 0, Math.PI, true); // trueで反時計回り
+                ctx.stroke();
+            }
+        }
+
+        // 初期描画
+        redrawAvatar();
+    </script>
+
+</body>
+</html>
