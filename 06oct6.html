@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>天職発見！職業適性診断</title>
+    <style>
+        body {
+            font-family: 'Avenir', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 20px;
+            background-color: #f7f9fc; /* 落ち着いた背景 */
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #007bff; /* ブルー */
+            margin-bottom: 40px;
+            border-bottom: 4px solid #e0f2f1;
+            padding-bottom: 15px;
+        }
+        .question-block {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #c5cae9;
+            border-left: 6px solid #17a2b8; /* シアン */
+            border-radius: 10px;
+            background-color: #e9ecef;
+        }
+        .question-block p {
+            font-weight: bold;
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: #007bff;
+            font-size: 1.15em;
+        }
+        label {
+            display: block;
+            margin-bottom: 10px;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 6px;
+            transition: background-color 0.2s;
+        }
+        label:hover {
+            background-color: #e0f7fa; /* 薄いシアン */
+        }
+        input[type="radio"] {
+            margin-right: 12px;
+            transform: scale(1.2);
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 18px;
+            background-color: #28a745; /* グリーン */
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.3em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.1s;
+            margin-top: 40px;
+        }
+        button:hover {
+            background-color: #218838;
+            transform: translateY(-3px);
+        }
+        #result {
+            margin-top: 40px;
+            padding: 30px;
+            border: 4px dashed #ffc107; /* イエロー */
+            border-radius: 15px;
+            background-color: #fff8e1;
+            text-align: center;
+            display: none;
+        }
+        #result h2 {
+            color: #dc3545; /* 赤 */
+            margin-top: 0;
+            font-size: 2em;
+        }
+        #result .type-name {
+            font-size: 1.8em;
+            color: #ffc107;
+            margin: 15px 0;
+        }
+        #result .type-catchphrase {
+            font-style: italic;
+            color: #6c757d;
+            margin-bottom: 20px;
+        }
+        #result .type-description {
+            text-align: left;
+            line-height: 1.8;
+            padding: 15px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+        .career-list {
+            margin-top: 15px;
+            padding: 10px 0;
+        }
+        .career-list li {
+            list-style: none;
+            padding: 5px 0;
+            border-bottom: 1px dotted #ccc;
+        }
+        .career-list strong {
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>【全20問】天職発見！あなたのキャリア適性診断</h1>
+    <p>あなたの仕事やキャリアに対する姿勢について、最も「はい」（点数が高い選択肢）または「いいえ」（点数が低い選択肢）に近いものを選んでください。</p>
+
+    <form id="personality-form">
+        <div class="question-block"><p>1. 人前で話したり、多くのクライアントと接したりする仕事に意欲的ですか？</p>
+            <label><input type="radio" name="q1" value="4"> はい（意欲的）</label>
+            <label><input type="radio" name="q1" value="1"> いいえ（内勤を好む）</label></div>
+        <div class="question-block"><p>2. 指示を待たずに、自分の判断で物事をスタートさせることに抵抗がありませんか？</p>
+            <label><input type="radio" name="q2" value="4"> はい</label>
+            <label><input type="radio" name="q2" value="1"> いいえ</label></div>
+        <div class="question-block"><p>3. チームやプロジェクトの責任者になることに、やりがいを感じますか？</p>
+            <label><input type="radio" name="q3" value="4"> はい</label>
+            <label><input type="radio" name="q3" value="1"> いいえ</label></div>
+        <div class="question-block"><p>4. 電話やメールだけでなく、直接会ってコミュニケーションを取ることを好みますか？</p>
+            <label><input type="radio" name="q4" value="4"> はい</label>
+            <label><input type="radio" name="q4" value="1"> いいえ</label></div>
+        <div class="question-block"><p>5. 競争が激しい環境や、明確な成果が求められる仕事の方が燃えますか？</p>
+            <label><input type="radio" name="q5" value="4"> はい</label>
+            <label><input type="radio" name="q5" value="1"> いいえ</label></div>
+
+        <div class="question-block"><p>6. 職場で重要な決定を下す際、感情よりデータと数字を信じますか？</p>
+            <label><input type="radio" name="q6" value="4"> はい</label>
+            <label><input type="radio" name="q6" value="1"> いいえ</label></div>
+        <div class="question-block"><p>7. 複雑な問題に対し、一つ一つ原因を突き止め、解決策を見つける作業が好きですか？</p>
+            <label><input type="radio" name="q7" value="4"> はい</label>
+            <label><input type="radio" name="q7" value="1"> いいえ</label></div>
+        <div class="question-block"><p>8. 自分の業務について、常に効率性や合理化を考えていますか？</p>
+            <label><input type="radio" name="q8" value="4"> はい</label>
+            <label><input type="radio" name="q8" value="1"> いいえ</label></div>
+        <div class="question-block"><p>9. 計画は変更される可能性を考慮し、常に代替案を用意しておくべきだと思いますか？</p>
+            <label><input type="radio" name="q9" value="4"> はい</label>
+            <label><input type="radio" name="q9" value="1"> いいえ</label></div>
+        <div class="question-block"><p>10. 専門的な知識やスキルを深めることが、仕事の最大の喜びですか？</p>
+            <label><input type="radio" name="q10" value="4"> はい</label>
+            <label><input type="radio" name="q10" value="1"> いいえ</label></div>
+
+        <div class="question-block"><p>11. 職場の人間関係のトラブル解決や、相談に乗ることを得意としますか？</p>
+            <label><input type="radio" name="q11" value="4"> はい</label>
+            <label><input type="radio" name="q11" value="1"> いいえ</label></div>
+        <div class="question-block"><p>12. 誰かの役に立っている実感がないと、仕事へのモチベーションが保てませんか？</p>
+            <label><input type="radio" name="q12" value="4"> はい</label>
+            <label><input type="q12" name="q12" value="1"> いいえ</label></div>
+        <div class="question-block"><p>13. チームの雰囲気や士気を高めるための努力を惜しみませんか？</p>
+            <label><input type="radio" name="q13" value="4"> はい</label>
+            <label><input type="radio" name="q13" value="1"> いいえ</label></div>
+        <div class="question-block"><p>14. クライアントや同僚の「気持ち」を理解することが、仕事の成功に不可欠だと思いますか？</p>
+            <label><input type="radio" name="q14" value="4"> はい</label>
+            <label><input type="radio" name="q14" value="1"> いいえ</label></div>
+        <div class="question-block"><p>15. 感謝の言葉や、感情的な交流が多い職場で働きたいですか？</p>
+            <label><input type="radio" name="q15" value="4"> はい</label>
+            <label><input type="radio" name="q15" value="1"> いいえ</label></div>
+            
+        <div class="question-block"><p>16. 決まった手順よりも、新しいやり方を探したり試したりする仕事が好きですか？</p>
+            <label><input type="radio" name="q16" value="4"> はい</label>
+            <label><input type="radio" name="q16" value="1"> いいえ</label></div>
+        <div class="question-block"><p>17. 常に新しいトレンドや技術を学び続け、仕事に取り入れたいですか？</p>
+            <label><input type="radio" name="q17" value="4"> はい</label>
+            <label><input type="radio" name="q17" value="1"> いいえ</label></div>
+        <div class="question-block"><p>18. 完璧さよりも、ユニークさやオリジナリティが評価される職場を選びたいですか？</p>
+            <label><input type="radio" name="q18" value="4"> はい</label>
+            <label><input type="radio" name="q18" value="1"> いいえ</label></div>
+        <div class="question-block"><p>19. 自分のペースで仕事を進められる、自由な裁量権を求めますか？</p>
+            <label><input type="radio" name="q19" value="4"> はい</label>
+            <label><input type="radio" name="q19" value="1"> いいえ</label></div>
+        <div class="question-block"><p>20. 「誰かの役に立つ」よりも「世の中にインパクトを与える」ことに興味がありますか？</p>
+            <label><input type="radio" name="q20" value="4"> はい</label>
+            <label><input type="radio" name="q20" value="1"> いいえ</label></div>
+
+        <button type="submit">あなたの天職を診断する！</button>
+    </form>
+
+    <div id="result">
+        </div>
+</div>
+
+<script>
+    document.getElementById('personality-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        let totalScore = 0;
+        const form = e.target;
+        const questions = Array.from({length: 20}, (_, i) => `q${i + 1}`);
+        let allAnswered = true;
+
+        // 全質問の回答をチェックし、点数を合計
+        questions.forEach(qName => {
+            const selected = form.elements[qName] ? form.elements[qName].value : null;
+            if (selected) {
+                totalScore += parseInt(selected, 10);
+            } else {
+                allAnswered = false;
+            }
+        });
+
+        const resultDiv = document.getElementById('result');
+
+        if (!allAnswered) {
+            resultDiv.style.display = 'block';
+            resultDiv.style.borderColor = '#dc3545';
+            resultDiv.style.backgroundColor = '#fce4e4';
+            resultDiv.innerHTML = '<h2>回答漏れエラー</h2><p>全ての20個の質問に答えてください。</p>';
+            return;
+        }
+
+        let typeName = '';
+        let typeCatchphrase = '';
+        let typeDescription = '';
+        let careerSuggestion = '';
+        
+        // 20点(最小) ~ 80点(最大)
+        // 8つのタイプに分けるため、約7点刻みでロジックを分割
+
+        if (totalScore >= 74) {
+            typeName = '【エグゼクティブ・リーダー】 - The Visionary CEO';
+            typeCatchphrase = '組織を統率し、未来を築く。圧倒的な行動力と洞察力の持ち主。';
+            typeDescription = '**最高峰の総合力**を持ち、大規模なプロジェクトや組織運営に最適です。**戦略的思考力**と**人々を鼓舞する力**を兼ね備えており、企業のトップや起業家として大きな成功を収めます。';
+            careerSuggestion = `
+                <li><strong>経営・マネジメント:</strong> CEO、COO、事業部長</li>
+                <li><strong>コンサルティング:</strong> 経営戦略コンサルタント</li>
+                <li><strong>起業:</strong> テクノロジー系スタートアップ創業者</li>
+            `;
+
+        } else if (totalScore >= 67) {
+            typeName = '【調和のプロデューサー】 - The Collaborative Facilitator';
+            typeCatchphrase = '技術と人間性を繋ぐ。チームの成功を引き出す影の立役者。';
+            typeDescription = '**論理と共感**のバランスが抜群で、専門知識を持ちながらも、チームの**モチベーション管理**や利害調整が得意です。技術と人の間に立つ職種で、高い信頼を得ます。';
+            careerSuggestion = `
+                <li><strong>IT・技術系:</strong> プロジェクトマネージャー (PM)、システムインテグレーター</li>
+                <li><strong>人事・教育:</strong> 組織開発コンサルタント、企業研修講師</li>
+                <li><strong>医療・福祉:</strong> 医療コーディネーター</li>
+            `;
+
+        } else if (totalScore >= 60) {
+            typeName = '【成果直結のスペシャリスト】 - The High-Performance Closer';
+            typeCatchphrase = '最短距離で結果を出す。冷徹な分析と行動力を持つセールスの鬼。';
+            typeDescription = '**競争心が強く、論理的**な判断力で常にトップを目指します。明確な目標と**数値的な成果**が求められる職場で真価を発揮し、高いインセンティブや裁量権がモチベーションに繋がります。';
+            careerSuggestion = `
+                <li><strong>営業・金融:</strong> 投資銀行家、トップセールス、M&Aアドバイザー</li>
+                <li><strong>マーケティング:</strong> データアナリスト、Webマーケター</li>
+                <li><strong>士業:</strong> 弁護士（企業法務系）</li>
+            `;
+
+        } else if (totalScore >= 53) {
+            typeName = '【人々を繋ぐ広報官】 - The Dynamic Communicator';
+            typeCatchphrase = '感情と熱意で人を惹きつける。サービス業のカリスマ。';
+            typeDescription = '**社交的で共感性**が高く、人の感情を動かすのが得意です。**最前線**で顧客と接し、サービスや商品の魅力を伝えることで最高の満足感を得ます。**ホスピタリティ**精神が天職に繋がります。';
+            careerSuggestion = `
+                <li><strong>サービス・観光:</strong> ホテルマネージャー、ツアーコンダクター</li>
+                <li><strong>広報・PR:</strong> 広報担当者、イベントプランナー</li>
+                <li><strong>エンタメ:</strong> タレントマネージャー、フリーランスのMC</li>
+            `;
+
+        } else if (totalScore >= 46) {
+            typeName = '【知的好奇心の探求者】 - The Scientific Researcher';
+            typeCatchphrase = '真理を追求し、複雑な知識を体系化する孤独な学者。';
+            typeDescription = '**論理的で創造性**に富みますが、内向的なため一人で深く掘り下げる仕事が向いています。**新しい理論**の構築や、既存の課題に対する**革新的なソリューション**を生み出す能力があります。';
+            careerSuggestion = `
+                <li><strong>研究開発:</strong> 大学教授、企業の研究員（R&D）</li>
+                <li><strong>IT・技術系:</strong> AIエンジニア、データサイエンティスト</li>
+                <li><strong>専門職:</strong> 特許弁理士、高度な専門知識を要する技術者</li>
+            `;
+
+        } else if (totalScore >= 39) {
+            typeName = '【感動を生むクリエイター】 - The Emotive Artist';
+            typeCatchphrase = '独自の感性で世界を描く。感情を揺さぶる表現のプロ。';
+            typeDescription = '**感情豊かで、強い創造性**を持っています。人の心に響く作品やコンテンツを生み出す才能があり、**自己表現**が仕事に直結する分野で活躍できます。自由な発想と時間管理が重要です。';
+            careerSuggestion = `
+                <li><strong>芸術・デザイン:</strong> グラフィックデザイナー、イラストレーター、映像作家</li>
+                <li><strong>出版・文筆:</strong> 作家、編集者、コピーライター</li>
+                <li><strong>エンタメ:</strong> 俳優、ミュージシャン、コンテンツクリエイター</li>
+            `;
+
+        } else if (totalScore >= 32) {
+            typeName = '【正確無比のオーディター】 - The Conscientious Administrator';
+            typeCatchphrase = '規則と精度を愛する。組織の基盤を支える緻密な番人。';
+            typeDescription = '**極めて論理的で正確性**を重んじます。曖昧さを排除し、**規則や基準に則って**業務を遂行する能力に長けています。組織の**健全性と信頼性**を守る仕事で必要不可欠な存在です。';
+            careerSuggestion = `
+                <li><strong>管理部門:</strong> 経理、財務、総務、人事労務</li>
+                <li><strong>監査・法務:</strong> 公認会計士、税理士、パラリーガル</li>
+                <li><strong>公務:</strong> 行政事務、官僚（緻密な法解釈が必要な分野）</li>
+            `;
+
+        } else { // 20点〜31点
+            typeName = '【縁の下のヒーラー】 - The Quiet Supporter';
+            typeCatchphrase = '寄り添い、力を引き出す。静かな献身で人を癒す専門家。';
+            typeDescription = '**内向的ですが、共感性**が非常に高く、競争を嫌います。一対一で**深く関わり、長期的に人を支援する**仕事に充実感を得ます。穏やかで、人に安心感を与える存在です。';
+            careerSuggestion = `
+                <li><strong>教育・支援:</strong> スクールカウンセラー、キャリアアドバイザー</li>
+                <li><strong>医療・福祉:</strong> 臨床心理士、看護師（特定の専門分野）、ケアマネージャー</li>
+                <li><strong>フリーランス:</strong> 翻訳家、データ入力（在宅で集中できる仕事）</li>
+            `;
+        }
+
+        // 結果を表示
+        resultDiv.style.display = 'block';
+        resultDiv.innerHTML = `
+            <h2>あなたの診断結果は...</h2>
+            <p class="type-name">${typeName}</p>
+            <p class="type-catchphrase">${typeCatchphrase}</p>
+            <div class="type-description">
+                <p><strong>【あなたの仕事スタイル】</strong></p>
+                <p>${typeDescription}</p>
+                
+                <p style="margin-top: 20px; color: #dc3545; font-weight: bold;">【あなたの天職カテゴリー】</p>
+                <ul class="career-list">${careerSuggestion}</ul>
+                <p style="margin-top: 20px; font-size: 0.9em; color: #6c757d;">※これは適性診断の結果に基づいた提案であり、最終的な職業選択はご自身の興味・関心と専門性を総合して行ってください。</p>
+            </div>
+        `;
+    });
+</script>
+
+</body>
+</html>
