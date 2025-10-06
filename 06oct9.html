@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>アイドルメンバーカラー診断</title>
+    <style>
+        body {
+            font-family: 'Avenir', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 20px;
+            background-color: #fce4ec;
+            color: #333;
+        }
+        .container {
+            max-width: 850px;
+            margin: auto;
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+        h1 {
+            text-align: center;
+            color: #e91e63;
+            margin-bottom: 40px;
+            border-bottom: 4px solid #f8bbd0;
+            padding-bottom: 15px;
+        }
+        .question-block {
+            margin-bottom: 25px;
+            padding: 20px;
+            border: 1px solid #ffcdd2;
+            border-left: 6px solid #e91e63;
+            border-radius: 10px;
+            background-color: #fcf4f5;
+        }
+        .question-block p {
+            font-weight: bold;
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: #c2185b;
+            font-size: 1.15em;
+        }
+        label {
+            display: block;
+            margin-bottom: 10px;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 6px;
+            transition: background-color 0.2s;
+        }
+        label:hover {
+            background-color: #f8e1e7;
+        }
+        input[type="radio"] {
+            margin-right: 12px;
+            transform: scale(1.2);
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 18px;
+            background-color: #9c27b0;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.3em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.1s;
+            margin-top: 40px;
+        }
+        button:hover {
+            background-color: #7b1fa2;
+            transform: translateY(-3px);
+        }
+        #result {
+            margin-top: 40px;
+            padding: 30px;
+            border: 4px dashed #ff9800;
+            border-radius: 15px;
+            background-color: #fff3e0;
+            text-align: center;
+            display: none;
+        }
+        #result h2 {
+            color: #e91e63;
+            margin-top: 0;
+            font-size: 2em;
+        }
+        #result .color-name {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin: 15px 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            padding: 10px;
+            border-radius: 8px;
+            display: inline-block;
+        }
+        #result .color-description {
+            text-align: left;
+            line-height: 1.8;
+            padding: 15px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>【15問】あなたのアイドルメンバーカラー診断（9色・解釈反映）</h1>
+    <p>あなたのアイドルとしての「情熱」「技術」「カリスマ」「協調性」を診断し、メンバーカラーを決定します。</p>
+
+    <form id="personality-form">
+        
+        <div class="question-block"><p>1. ステージに立つとき、誰よりも目立とうとする意欲が湧きますか？</p>
+            <label><input type="radio" name="q1" value="4"> 強く湧く</label>
+            <label><input type="radio" name="q1" value="1"> メンバーとの調和を重視する</label></div>
+        <div class="question-block"><p>2. 困難な状況でも、自分の理想のパフォーマンスを諦めず貫きますか？</p>
+            <label><input type="radio" name="q2" value="4"> 貫く</label>
+            <label><input type="radio" name="q2" value="1"> 柔軟に状況に合わせる</label></div>
+        <div class="question-block"><p>3. 自分のファンを増やし、グループを牽引したいという野心がありますか？</p>
+            <label><input type="radio" name="q3" value="4"> はい、ある</label>
+            <label><input type="radio" name="q3" value="1"> いいえ、支える役割で良い</label></div>
+        <div class="question-block"><p>4. 疲れていても、カメラが回るとすぐに最高の笑顔を作れますか？</p>
+            <label><input type="radio" name="q4" value="4"> できる</label>
+            <label><input type="radio" name="q4" value="1"> 感情が表情に出やすい</label></div>
+
+        <div class="question-block"><p>5. 歌やダンスの練習は、誰かに言われなくても徹底的に繰り返しますか？</p>
+            <label><input type="radio" name="q5" value="4"> はい</label>
+            <label><input type="radio" name="q5" value="1"> いいえ</label></div>
+        <div class="question-block"><p>6. 自分の個性や魅力を、言葉や服装で表現するのが得意ですか？</p>
+            <label><input type="radio" name="q6" value="4"> 得意</label>
+            <label><input type="radio" name="q6" value="1"> どちらかといえば苦手</label></div>
+        <div class="question-block"><p>7. 誰も思いつかないような、斬新なアイデアを企画するのが好きですか？</p>
+            <label><input type="radio" name="q7" value="4"> はい</label>
+            <label><input type="radio" name="q7" value="1"> いいえ</label></div>
+        <div class="question-block"><p>8. ステージの構成や照明など、技術的な部分に興味を持ち分析しますか？</p>
+            <label><input type="radio" name="q8" value="4"> はい</label>
+            <label><input type="radio" name="q8" value="1"> いいえ</label></div>
+
+        <div class="question-block"><p>9. 初めてのファンともすぐに打ち解け、親密なコミュニケーションが取れますか？</p>
+            <label><input type="radio" name="q9" value="4"> はい、得意</label>
+            <label><input type="radio" name="q9" value="1"> いいえ、人見知りする</label></div>
+        <div class="question-block"><p>10. 自分のSNSは、頻繁に更新しファンとの交流を重視しますか？</p>
+            <label><input type="radio" name="q10" value="4"> はい</label>
+            <label><input type="radio" name="q10" value="1"> いいえ</label></div>
+        <div class="question-block"><p>11. 握手会や特典会では、一人一人に合った言葉をかけてあげたいと思いますか？</p>
+            <label><input type="radio" name="q11" value="4"> 強く思う</label>
+            <label><input type="radio" name="q11" value="1"> 流れ作業になりがち</label></div>
+        <div class="question-block"><p>12. ライブでのMCやトークで、場を盛り上げたり仕切ったりするのが得意ですか？</p>
+            <label><input type="radio" name="q12" value="4"> はい、得意</label>
+            <label><input type="radio" name="q12" value="1"> いいえ、聞き役に回りたい</label></div>
+
+        <div class="question-block"><p>13. メンバーが悩んでいるとき、パフォーマンスよりメンタルケアを優先しますか？</p>
+            <label><input type="radio" name="q13" value="4"> はい</label>
+            <label><input type="radio" name="q13" value="1"> いいえ</label></div>
+        <div class="question-block"><p>14. グループのルールや決定には、自分の意見が違っても従うべきだと思いますか？</p>
+            <label><input type="radio" name="q14" value="4"> はい</label>
+            <label><input type="radio" name="q14" value="1"> いいえ</label></div>
+        <div class="question-block"><p>15. どんなに忙しくても、一人の時間で心を落ち着かせたいですか？</p>
+            <label><input type="radio" name="q15" value="4"> はい（一人の時間が必要）</label>
+            <label><input type="radio" name="q15" value="1"> いいえ（メンバーと一緒の方が落ち着く）</label></div>
+
+
+        <button type="submit">あなたのメンバーカラーを診断！</button>
+    </form>
+
+    <div id="result">
+        </div>
+</div>
+
+<script>
+    document.getElementById('personality-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        // 各特性のスコアを計算
+        let scorePassion = 0; // 情熱・プロ意識 (Q1-Q4)
+        let scoreSkill = 0;  // 技術・自己表現 (Q5-Q8)
+        let scoreCharisma = 0; // カリスマ・ファンサービス (Q9-Q12)
+        let scoreAlone = 0; // 協調性・内面 (Q13-Q14は協調性、Q15は内向性)
+
+        const form = e.target;
+        const questions = Array.from({length: 15}, (_, i) => `q${i + 1}`);
+        let allAnswered = true;
+
+        questions.forEach((qName, index) => {
+            const selected = form.elements[qName] ? form.elements[qName].value : null;
+            if (!selected) {
+                allAnswered = false;
+                return;
+            }
+            const value = parseInt(selected, 10);
+            
+            if (index >= 0 && index <= 3) {
+                scorePassion += value;
+            } else if (index >= 4 && index <= 7) {
+                scoreSkill += value;
+            } else if (index >= 8 && index <= 11) {
+                scoreCharisma += value;
+            } else if (index >= 12 && index <= 14) {
+                // Q13, Q14 (協調性)
+                if (index === 12 || index === 13) scoreAlone += value;
+                // Q15 (内向性: 4点が高い)
+                if (index === 14) scoreAlone += value; 
+            }
+        });
+
+        const resultDiv = document.getElementById('result');
+
+        if (!allAnswered) {
+            resultDiv.style.display = 'block';
+            resultDiv.style.borderColor = '#dc3545';
+            resultDiv.style.backgroundColor = '#fce4e4';
+            resultDiv.innerHTML = '<h2>回答漏れエラー</h2><p>全ての15個の質問に答えてください。</p>';
+            return;
+        }
+
+        // 各特性の平均スコアを計算 (4点満点)
+        const avgPassion = scorePassion / 4;
+        const avgSkill = scoreSkill / 4;
+        const avgCharisma = scoreCharisma / 4;
+        // 協調性/内向性の平均 (3問/4点満点)
+        const avgAlone = scoreAlone / 3; 
+
+        // 各軸で「高い(H)」か「低い(L)」かを判定 (中間値2.5を基準)
+        const isPassionHigh = avgPassion >= 3.0; // 赤は高めに設定
+        const isSkillHigh = avgSkill >= 2.5;
+        const isCharismaHigh = avgCharisma >= 2.5;
+        const isAloneHigh = avgAlone >= 2.5; // Q15が4なら内向性高、Q13/14が4なら協調性高
+        
+        // 判定パターンキー (情熱・技術・カリスマ・内向性/協調性)
+        let typeKey = '';
+        typeKey += isPassionHigh ? 'P' : 'p'; 
+        typeKey += isSkillHigh ? 'S' : 's'; 
+        typeKey += isCharismaHigh ? 'C' : 'c'; 
+        typeKey += isAloneHigh ? 'A' : 'n'; // Alone (高いと協調性/内向性) or Non-Alone (低いと非協調性/外向性)
+
+        // 結果と色の情報
+        let colorData = {};
+        
+        // 9色に合わせたロジック（ユーザー解釈反映）
+        
+        if (typeKey.startsWith('P') && avgSkill >= 3.5 && avgCharisma >= 3.5) {
+            // 赤：不動のリーダー、センター（情熱が非常に高く、他も高い）
+            colorData = {
+                name: ' 不動の **赤（レッド）** ',
+                hex: '#FF0000',
+                role: '不動の**リーダー**・**センター**',
+                description: '圧倒的な**情熱とプロ意識**の持ち主。最高の技術とカリスマ性を兼ね備え、グループ全体を勝利に導く**絶対的なエース**です。',
+            };
+        } else if (typeKey.startsWith('P') && avgSkill >= 3.0 && typeKey.endsWith('n')) {
+             // 黒：クールな一匹狼、実力主義（情熱・技術が高く、協調性が低い）
+            colorData = {
+                name: ' クールな **黒（ブラック）** ',
+                hex: '#111111',
+                role: '**裏エース**・**実力主義者**',
+                description: '**実力至上主義**で、馴れ合いを嫌う孤高の存在。内に秘めた情熱を**クールなパフォーマンス**で表現し、他の追随を許さない圧倒的な実力で魅了します。',
+            };
+        } else if (typeKey.startsWith('p') && avgSkill >= 3.0 && typeKey.endsWith('n')) {
+            // 青：知的、クール担当（情熱は普通だが、技術が高く、協調性より独立を好む）
+            colorData = {
+                name: ' 知的な **青（ブルー）** ',
+                hex: '#00BFFF',
+                role: '**クール担当**・**分析家**',
+                description: '感情的にならず、**冷静な分析**と**確かな技術**でパフォーマンスの質を支えます。物事を俯瞰して見る能力が高く、知的でクールな魅力を放ちます。',
+            };
+        } else if (typeKey.endsWith('A') && avgSkill < 2.5 && avgPassion < 2.5) {
+            // 白：天使のようでピュア（情熱・技術・カリスマが控えめだが、内向的傾向がある）
+            colorData = {
+                name: ' 天使の **白（ホワイト）** ',
+                hex: '#F0F8FF',
+                role: '**ビジュアル担当**・**ピュア**',
+                description: '競争を嫌う**清らかさ**と**透明感**が魅力。控えめながら、その**純粋な存在**自体がグループの癒やしであり、ファンに平和と安らぎを与えます。',
+                textColor: '#333',
+                borderColor: '2px solid #333'
+            };
+        } else if (typeKey.includes('S') && typeKey.includes('A') && avgPassion < 3.0) {
+            // 緑：和ませ担当で努力家（技術と協調性があり、情熱は控えめ）
+            colorData = {
+                name: ' 和みの **緑（グリーン）** ',
+                hex: '#3CB371',
+                role: '**努力家**・**和ませ担当**',
+                description: '**地道な努力**を欠かさず、技術を磨く**実直なアイドル**。協調性を重んじ、メンバーが和やかに活動できるよう気を配る**グループの良心**です。',
+            };
+        } else if (typeKey.includes('C') && avgPassion < 3.0 && avgSkill < 3.0) {
+            // ピンク：キュートで親しみやすい（カリスマが高く、全体的にバランスが良い）
+            colorData = {
+                name: ' 魅惑の **ピンク** ',
+                hex: '#FF69B4',
+                role: '**キュート担当**・**親しみやすさ**',
+                description: '天性の**愛嬌**と**人懐っこさ**で、すぐにファンを惹きつけます。抜群のファンサービスで親密な関係を築き、グループに**華やかさ**をもたらします。',
+            };
+        } else if (typeKey.startsWith('p') && typeKey.includes('C') && avgCharisma >= 3.0) {
+            // 黄色：明るく親しみやすい、バラエティ向け（カリスマが非常に高いが、技術は控えめ）
+            colorData = {
+                name: ' フレッシュな **黄（イエロー）** ',
+                hex: '#FFD700',
+                role: '**バラエティ担当**・**自由人**',
+                description: '**明るい笑顔**と**抜群のトーク力**で場を盛り上げるムードメーカー。**親しみやすさ**と、計算外の行動から生まれる**面白さ**が魅力で、テレビやバラエティで大活躍します。',
+            };
+        } else if (typeKey.startsWith('P') && typeKey.includes('C') && typeKey.endsWith('A')) {
+            // 紫：ミステリアスで一匹狼（情熱・カリスマが高く、協調性より内向性）
+            colorData = {
+                name: ' 神秘的な **紫（パープル）** ',
+                hex: '#8A2BE2',
+                role: '**ミステリアス**・**一匹狼**',
+                description: '情熱的でありながら**一歩引いた内省的な魅力**を持つ**孤高の表現者**。独自の**深い世界観**とミステリアスな雰囲気が、コアなファンを熱狂させます。',
+            };
+        } else {
+            // 残りのパターン（特にバランス型や情熱/カリスマが中程度）
+            colorData = {
+                name: ' 太陽の **オレンジ** ',
+                hex: '#FFA500',
+                role: '**ムードメーカー**・**元気印**',
+                description: '持ち前の**明るさ**で、メンバーもファンも元気にする**太陽のような存在**。誰とでもすぐに打ち解ける**オープンな性格**で、グループ全体にポジティブなエネルギーを注入します。',
+            };
+        }
+
+        // 結果表示
+        resultDiv.style.display = 'block';
+        resultDiv.style.backgroundColor = '#fff3e0';
+        resultDiv.innerHTML = `
+            <h2>あなたのアイドルとしてのメンバーカラーは...</h2>
+            <p class="color-name" style="background-color: ${colorData.hex}; color: ${colorData.textColor || 'white'}; border: ${colorData.borderColor || 'none'};">
+                ${colorData.name}
+            </p>
+            <div class="color-description">
+                <p><strong>【あなたのアイドル内での役割】</strong></p>
+                <p>**${colorData.role}**</p>
+                
+                <p style="margin-top: 20px;"><strong>【アイドルとしての魅力】</strong></p>
+                <p>${colorData.description}</p>
+                
+                <p style="margin-top: 20px; font-size: 0.9em; color: #6c757d;">※判定キー: ${typeKey} (情熱・技術・カリスマ・内向性/協調性)</p>
+                <p style="margin-top: 10px; font-size: 0.9em; color: #6c757d;">※情熱スコア: ${avgPassion.toFixed(1)}/4.0, 技術スコア: ${avgSkill.toFixed(1)}/4.0, カリスマスコア: ${avgCharisma.toFixed(1)}/4.0, 協調性/内向性スコア: ${avgAlone.toFixed(1)}/4.0</p>
+            </div>
+        `;
+    });
+</script>
+
+</body>
+</html>
