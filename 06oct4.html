@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>流行りの簡易性格診断</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #007bff;
+            margin-bottom: 30px;
+        }
+        .question-block {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+        .question-block p {
+            font-weight: bold;
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: #555;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        label:hover {
+            background-color: #e6f7ff;
+        }
+        input[type="radio"] {
+            margin-right: 8px;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        #result {
+            margin-top: 30px;
+            padding: 20px;
+            border: 2px dashed #ffc107;
+            border-radius: 10px;
+            background-color: #fffbef;
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: bold;
+            display: none; /* 初期状態では非表示 */
+        }
+        #result h2 {
+            color: #d89e00;
+            margin-top: 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>簡易性格診断テスト</h1>
+    <p>以下の質問に、最も当てはまる選択肢を選んでください。</p>
+
+    <form id="personality-form">
+        <div class="question-block">
+            <p>1. 週末の予定を決めるなら？</p>
+            <label><input type="radio" name="q1" value="4"> 賑やかなパーティーやイベントに参加する</label>
+            <label><input type="radio" name="q1" value="3"> 友人や恋人と少人数で過ごす</label>
+            <label><input type="radio" name="q1" value="2"> 趣味や勉強に没頭する</label>
+            <label><input type="radio" name="q1" value="1"> 家でゆっくりと読書や映画を楽しむ</label>
+        </div>
+
+        <div class="question-block">
+            <p>2. 新しいことを始めるとき、重視するのは？</p>
+            <label><input type="radio" name="q2" value="4"> 成功への確信と、具体的な成果</label>
+            <label><input type="radio" name="q2" value="3"> 楽しさや、ワクワクする気持ち</label>
+            <label><input type="radio" name="q2" value="2"> 計画性や、準備の確実さ</label>
+            <label><input type="radio" name="q2" value="1"> 他の人の意見や、協調性</label>
+        </div>
+
+        <div class="question-block">
+            <p>3. トラブルが発生したとき、どう対応する？</p>
+            <label><input type="radio" name="q3" value="4"> まず行動！迅速な解決策を試す</label>
+            <label><input type="radio" name="q3" value="3"> 周囲の人と話し合い、協力を仰ぐ</label>
+            <label><input type="radio" name="q3" value="2"> 原因を冷静に分析し、論理的な手順を踏む</label>
+            <label><input type="radio" name="q3" value="1"> 一旦立ち止まり、気持ちを落ち着かせることを優先する</label>
+        </div>
+
+        <div class="question-block">
+            <p>4. 他者からどう見られたい？</p>
+            <label><input type="radio" name="q4" value="4"> リーダーシップがあり、頼れる存在</label>
+            <label><input type="radio" name="q4" value="3"> 優しく、誰にでも気遣いができる人</label>
+            <label><input type="radio" name="q4" value="2"> 知的で、物事を深く理解している人</label>
+            <label><input type="radio" name="q4" value="1"> 個性があり、自分らしさを貫いている人</label>
+        </div>
+
+        <button type="submit">診断する</button>
+    </form>
+
+    <div id="result">
+        </div>
+</div>
+
+<script>
+    document.getElementById('personality-form').addEventListener('submit', function(e) {
+        e.preventDefault(); // フォームのデフォルト送信をキャンセル
+
+        let totalScore = 0;
+        const form = e.target;
+        const questions = ['q1', 'q2', 'q3', 'q4'];
+        let allAnswered = true;
+
+        // 全質問の回答をチェックし、点数を合計
+        questions.forEach(qName => {
+            const selected = form.elements[qName].value;
+            if (selected) {
+                totalScore += parseInt(selected, 10);
+            } else {
+                allAnswered = false;
+            }
+        });
+
+        const resultDiv = document.getElementById('result');
+
+        if (!allAnswered) {
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '<h2>エラー</h2><p>全ての質問に答えてください。</p>';
+            resultDiv.style.borderColor = 'red';
+            resultDiv.style.backgroundColor = '#ffeeee';
+            return;
+        }
+
+        let typeName = '';
+        let description = '';
+
+        // 点数に基づいた診断ロジック
+        // 4問 x 1~4点 = 4点(最小) ~ 16点(最大)
+        if (totalScore >= 14) {
+            typeName = '【エネルギッシュなパイオニア】';
+            description = '常に目標に向かって突き進む、行動力と自信に満ちたリーダータイプです。新しい挑戦を好み、周りを引っ張っていく力があります。';
+        } else if (totalScore >= 11) {
+            typeName = '【調和を愛するコミュニケーター】';
+            description = '人との繋がりを大切にし、協調性が高いタイプです。明るく、周囲のムードメーカーになることが多く、共感力が優れています。';
+        } else if (totalScore >= 8) {
+            typeName = '【論理的なストラテジスト】';
+            description = '物事を深く考え、論理的に分析するのが得意なタイプです。計画的で、感情に流されずに冷静な判断を下すことができます。';
+        } else { // 4点〜7点
+            typeName = '【マイペースなアーティスト】';
+            description = '自分の価値観を大切にし、独自のペースを持つタイプです。内向的で、創造性や芸術的な分野で力を発揮することが多いでしょう。';
+        }
+
+        // 結果を表示
+        resultDiv.style.display = 'block';
+        resultDiv.style.borderColor = '#ffc107';
+        resultDiv.style.backgroundColor = '#fffbef';
+        resultDiv.innerHTML = `
+            <h2>あなたの診断結果は...</h2>
+            <p style="font-size: 1.5em; color: #d89e00;">${typeName}</p>
+            <p>${description}</p>
+        `;
+    });
+</script>
+
+</body>
+</html>
