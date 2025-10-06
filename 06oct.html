@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>シンプルUFOキャッチャー</title>
+    <style>
+        /* 1. スタイリング */
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f9;
+            padding-top: 20px;
+        }
+        canvas {
+            border: 5px solid #333;
+            background-color: #eee;
+            display: block;
+            margin: 20px auto;
+            box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        .controls {
+            margin-top: 20px;
+        }
+        button {
+            padding: 10px 25px;
+            font-size: 18px;
+            margin: 5px 10px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            transition: background-color 0.1s;
+        }
+        #leftButton, #rightButton {
+            background-color: #007bff; /* 青 */
+        }
+        #downButton {
+            background-color: #28a745; /* 緑 */
+        }
+        button:active {
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+
+    <h1> シンプルUFOキャッチャー </h1>
+
+    <canvas id="gameCanvas" width="600" height="400"></canvas>
+
+    <div class="controls">
+        <button id="leftButton"> 左へ</button>
+        <button id="rightButton">右へ </button>
+        <button id="downButton">キャッチ！ (決定)</button>
+    </div>
+
+    <script>
+        // キャンバス要素を取得
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // --- ゲーム設定 ---
+        const CANVAS_WIDTH = canvas.width;
+        const CANVAS_HEIGHT = canvas.height;
+        const GROUND_Y = CANVAS_HEIGHT - 30; // 床のY座標
+
+        // --- クレーンの設定 ---
+        const crane = {
+            x: CANVAS_WIDTH / 2 - 25,
+            y: 10,
+            width: 50,
+            height: 10,
+            armLength: 50,
+            speed: 3, // 横移動速度を少し遅く調整
+            isMovingHorizontal: false,
+            isDropping: false,
+            isRaising: false, // 上昇中フラグを追加
+            dropY: 0,
+            hasPrize: false
+        };
+
+        // --- 景品の設定 ---
+        const prize = {
+            x: 100,
+            y: GROUND_Y - 30, // 床から景品の高さ分上
+            width: 30,
+            height: 30,
+            color: '#dc3545', // 赤
+            isCaught: false
+        };
+
+        // --- 描画関数 ---
+        function draw() {
+            // 画面をクリア
+            ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+            
+            // 床を描画
+            ctx.fillStyle = '#6c757d'; // 灰色
+            ctx.fillRect(0, GROUND_Y, CANVAS_WIDTH, CANVAS_HEIGHT - GROUND_Y);
+
+            // 景品を描画
+            if (!prize.isCaught) {
+                // 通常の景品
+                ctx.fillStyle = prize.color;
+                ctx.fillRect(prize.x, prize.y, prize.width, prize.height);
+            } else if (crane.hasPrize) {
+                // キャッチされている場合はクレーンの位置に描画
+                ctx.fillStyle = prize.color;
+                ctx.fillRect(
+                    crane.x + (crane.width - prize.width) / 2, // クレーン中央
+                    crane.y + crane.height + crane.armLength + crane.dropY, // アームの下
+                    prize.width,
+                    prize.height
+                );
+            }
+
+            // クレーンの本体を描画
+            ctx.fillStyle = '#17a2b8'; // 水色
+            ctx.fillRect(crane.x, crane.y, crane.width, crane.height);
+
+            // クレーンのアームを描画
+            const currentArmLength = crane.armLength + crane.dropY;
+            ctx.strokeStyle = '#17a2b8';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            
+            // アームの左側
+            const armLeftX = crane.x + crane.width * 0.2;
+            ctx.moveTo(armLeftX, crane.y + crane.height);
+            ctx.lineTo(armLeftX, crane.y + crane.height + currentArmLength);
+            
+            // アームの右側
+            const armRightX = crane.x + crane.width * 0.8;
+            ctx.moveTo(armRightX, crane.y + crane.height);
+            ctx.lineTo(armRightX, crane.y + crane.height + currentArmLength);
+            
+            // アームのクロー (シンプルに横線)
+            if (crane.isDropping || crane.isRaising || crane.hasPrize) {
+                ctx.moveTo(armLeftX, crane.y + crane.height + currentArmLength);
+                ctx.lineTo(armRightX, crane.y + crane.height + currentArmLength);
+            }
+            
+            ctx.stroke();
+
+            // 状況テキスト
+            ctx.fillStyle = 'black';
+            ctx.font = '16px Arial';
+            let statusText = '';
+            if (crane.isDropping) statusText = ' 落下中...';
+            else if (crane.isRaising) statusText = ' 上昇中...';
+            else if (crane.hasPrize) statusText = ' 獲得！';
+            else statusText = ' 位置を決めてキャッチ！';
+            
+            ctx.fillText(statusText, 10, 20);
+        }
+
+        // --- 更新ロジック ---
+        function update() {
+            // 1. 横移動
+            if (crane.isMovingHorizontal && !crane.isDropping && !crane.isRaising) {
+                crane.x += crane.speed;
+                // 画面端の制限
+                if (crane.x < 0 || crane.x + crane.width > CANVAS_WIDTH) {
+                    crane.speed *= -1; // 反転
+                }
+            }
+
+            // 2. 落下処理
+            if (crane.isDropping) {
+                crane.dropY += 5; // 落下速度
+
+                // アームの先端のY座標
+                const armTipY = crane.y + crane.height + crane.armLength + crane.dropY;
+
+                if (armTipY >= GROUND_Y) {
+                    // 床に到達 (または景品の位置)
+                    crane.dropY = GROUND_Y - crane.y - crane.height - crane.armLength; // 床の位置で止める
+                    
+                    // X座標が景品の上にあるか判定
+                    const isOverPrize = (crane.x + crane.width * 0.2 < prize.x + prize.width) &&
+                                        (crane.x + crane.width * 0.8 > prize.x);
+
+                    if (isOverPrize && !prize.isCaught) {
+                        // --- キャッチ成功判定 ---
+                        prize.isCaught = true;
+                        crane.hasPrize = true;
+                    }
+                    
+                    // 落下終了、上昇開始
+                    crane.isDropping = false;
+                    crane.isRaising = true;
+                }
+            }
+
+            // 3. 上昇処理
+            if (crane.isRaising) {
+                crane.dropY -= 5; // 上昇速度
+                
+                if (crane.dropY <= 0) {
+                    // 元の位置に戻った
+                    crane.dropY = 0;
+                    crane.isRaising = false;
+                    
+                    if (crane.hasPrize) {
+                        // 景品獲得
+                        setTimeout(() => {
+                            alert("おめでとう！景品を獲得しました！");
+                            resetGame();
+                        }, 100);
+                    } else {
+                        // 失敗、操作可能に戻る
+                        // 特になし
+                    }
+                }
+            }
+        }
+
+        // --- ゲームループ ---
+        function gameLoop() {
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // --- ゲームリセット関数 ---
+        function resetGame() {
+            crane.x = CANVAS_WIDTH / 2 - 25;
+            crane.isMovingHorizontal = false;
+            crane.isDropping = false;
+            crane.isRaising = false;
+            crane.dropY = 0;
+            crane.hasPrize = false;
+            
+            // 景品も元の位置に戻す
+            prize.x = Math.random() * (CANVAS_WIDTH - 50) + 10; // ランダムな位置
+            prize.y = GROUND_Y - 30;
+            prize.isCaught = false;
+        }
+
+        // --- ボタン操作 ---
+        document.getElementById('leftButton').addEventListener('mousedown', () => {
+            if (!crane.isDropping && !crane.isRaising) {
+                crane.speed = -Math.abs(crane.speed);
+                crane.isMovingHorizontal = true;
+            }
+        });
+        document.getElementById('rightButton').addEventListener('mousedown', () => {
+            if (!crane.isDropping && !crane.isRaising) {
+                crane.speed = Math.abs(crane.speed);
+                crane.isMovingHorizontal = true;
+            }
+        });
+        document.getElementById('leftButton').addEventListener('mouseup', () => {
+            crane.isMovingHorizontal = false;
+        });
+        document.getElementById('rightButton').addEventListener('mouseup', () => {
+            crane.isMovingHorizontal = false;
+        });
+        // キーボード操作 (オプション)
+        document.addEventListener('keydown', (e) => {
+            if (!crane.isDropping && !crane.isRaising) {
+                if (e.key === 'ArrowLeft') {
+                    crane.speed = -Math.abs(crane.speed);
+                    crane.isMovingHorizontal = true;
+                } else if (e.key === 'ArrowRight') {
+                    crane.speed = Math.abs(crane.speed);
+                    crane.isMovingHorizontal = true;
+                } else if (e.key === ' ' || e.key === 'ArrowDown') { // スペースキーまたは下矢印
+                    crane.isMovingHorizontal = false;
+                    crane.isDropping = true;
+                    crane.dropY = 0;
+                }
+            }
+        });
+        document.addEventListener('keyup', (e) => {
+            if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+                crane.isMovingHorizontal = false;
+            }
+        });
+
+
+        document.getElementById('downButton').addEventListener('click', () => {
+            if (!crane.isDropping && !crane.isRaising) {
+                crane.isMovingHorizontal = false; // 横移動を停止
+                crane.isDropping = true;          // 落下開始
+                crane.dropY = 0;                  // 落下距離をリセット
+            }
+        });
+
+        // ゲーム開始
+        resetGame(); // 初期位置をセット
+        gameLoop();
+    </script>
+
+</body>
+</html>
