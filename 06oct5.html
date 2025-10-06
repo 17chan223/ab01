@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>究極版 パーソナリティ診断</title>
+    <style>
+        body {
+            font-family: 'Avenir', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 20px;
+            background-color: #e8eaf6; /* ライトブルーの背景 */
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #43a047; /* グリーン */
+            margin-bottom: 40px;
+            border-bottom: 4px solid #c5cae9;
+            padding-bottom: 15px;
+        }
+        .question-block {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #c5cae9;
+            border-left: 6px solid #43a047; /* アクセント */
+            border-radius: 10px;
+            background-color: #f7f9fd;
+        }
+        .question-block p {
+            font-weight: bold;
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: #3f51b5; /* インディゴブルー */
+            font-size: 1.15em;
+        }
+        label {
+            display: block;
+            margin-bottom: 10px;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 6px;
+            transition: background-color 0.2s;
+        }
+        label:hover {
+            background-color: #e8f5e9; /* 薄いグリーン */
+        }
+        input[type="radio"] {
+            margin-right: 12px;
+            transform: scale(1.2);
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 18px;
+            background-color: #ff9800; /* オレンジ */
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.3em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.1s;
+            margin-top: 40px;
+        }
+        button:hover {
+            background-color: #fb8c00;
+            transform: translateY(-3px);
+        }
+        #result {
+            margin-top: 40px;
+            padding: 30px;
+            border: 4px dashed #ff9800;
+            border-radius: 15px;
+            background-color: #fff3e0;
+            text-align: center;
+            display: none;
+        }
+        #result h2 {
+            color: #d32f2f; /* 赤 */
+            margin-top: 0;
+            font-size: 2em;
+        }
+        #result .type-name {
+            font-size: 1.8em;
+            color: #ff9800;
+            margin: 15px 0;
+        }
+        #result .type-catchphrase {
+            font-style: italic;
+            color: #757575;
+            margin-bottom: 20px;
+        }
+        #result .type-description {
+            text-align: left;
+            line-height: 1.8;
+            padding: 15px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+        .prompt-text {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #e0f2f1;
+            border: 1px dashed #009688;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>【全20問】究極版！パーソナリティ＆アビリティ診断</h1>
+    <p>以下の質問に、最も「はい」（点数が高い選択肢）または「いいえ」（点数が低い選択肢）に近いものを選んでください。</p>
+
+    <form id="personality-form">
+        <div class="question-block"><p>1. 初めての環境でも、すぐに人に話しかけることができますか？</p>
+            <label><input type="radio" name="q1" value="4"> はい（当てはまる）</label>
+            <label><input type="radio" name="q1" value="1"> いいえ（あまり当てはまらない）</label></div>
+        <div class="question-block"><p>2. 計画を立てるより、まずは行動に移すことが多いですか？</p>
+            <label><input type="radio" name="q2" value="4"> はい</label>
+            <label><input type="radio" name="q2" value="1"> いいえ</label></div>
+        <div class="question-block"><p>3. チームのリーダーやまとめ役になることに抵抗がありませんか？</p>
+            <label><input type="radio" name="q3" value="4"> はい</label>
+            <label><input type="radio" name="q3" value="1"> いいえ</label></div>
+        <div class="question-block"><p>4. 多くの人と同時にコミュニケーションを取るのが得意ですか？</p>
+            <label><input type="radio" name="q4" value="4"> はい</label>
+            <label><input type="radio" name="q4" value="1"> いいえ</label></div>
+        <div class="question-block"><p>5. 自分の意見は、相手が誰であってもはっきり伝える方ですか？</p>
+            <label><input type="radio" name="q5" value="4"> はい</label>
+            <label><input type="radio" name="q5" value="1"> いいえ</label></div>
+
+        <div class="question-block"><p>6. 感情よりも、客観的なデータや論理で物事を判断しますか？</p>
+            <label><input type="radio" name="q6" value="4"> はい</label>
+            <label><input type="radio" name="q6" value="1"> いいえ</label></div>
+        <div class="question-block"><p>7. 複雑なシステムや仕組みを理解するのが好きですか？</p>
+            <label><input type="radio" name="q7" value="4"> はい</label>
+            <label><input type="radio" name="q7" value="1"> いいえ</label></div>
+        <div class="question-block"><p>8. 感情的な議論より、冷静な分析を重視しますか？</p>
+            <label><input type="radio" name="q8" value="4"> はい</label>
+            <label><input type="radio" name="q8" value="1"> いいえ</label></div>
+        <div class="question-block"><p>9. 決定を下す前に、すべての可能性を徹底的に検討しますか？</p>
+            <label><input type="radio" name="q9" value="4"> はい</label>
+            <label><input type="radio" name="q9" value="1"> いいえ</label></div>
+        <div class="question-block"><p>10. 新しいアイデアより、実現性や確実性を重視しますか？</p>
+            <label><input type="radio" name="q10" value="4"> はい</label>
+            <label><input type="radio" name="q10" value="1"> いいえ</label></div>
+
+        <div class="question-block"><p>11. 他人の気持ちが痛いほど分かることがありますか？</p>
+            <label><input type="radio" name="q11" value="4"> はい</label>
+            <label><input type="radio" name="q11" value="1"> いいえ</label></div>
+        <div class="question-block"><p>12. 誰かを助けるためなら、自分の予定を変えても構いませんか？</p>
+            <label><input type="radio" name="q12" value="4"> はい</label>
+            <label><input type="radio" name="q12" value="1"> いいえ</label></div>
+        <div class="question-block"><p>13. 人間関係の調和や平和をとても大切にしますか？</p>
+            <label><input type="radio" name="q13" value="4"> はい</label>
+            <label><input type="radio" name="q13" value="1"> いいえ</label></div>
+        <div class="question-block"><p>14. 感謝の言葉や愛情表現は、積極的に伝える方ですか？</p>
+            <label><input type="radio" name="q14" value="4"> はい</label>
+            <label><input type="radio" name="q14" value="1"> いいえ</label></div>
+        <div class="question-block"><p>15. 映画や小説に深く感情移入して泣いたり笑ったりしますか？</p>
+            <label><input type="radio" name="q15" value="4"> はい</label>
+            <label><input type="radio" name="q15" value="1"> いいえ</label></div>
+            
+        <div class="question-block"><p>16. 完璧な計画より、自由な発想や即興性を求めますか？</p>
+            <label><input type="radio" name="q16" value="4"> はい</label>
+            <label><input type="radio" name="q16" value="1"> いいえ</label></div>
+        <div class="question-block"><p>17. 誰も考えつかないような斬新なアイデアを思いつくことがありますか？</p>
+            <label><input type="radio" name="q17" value="4"> はい</label>
+            <label><input type="radio" name="q17" value="1"> いいえ</label></div>
+        <div class="question-block"><p>18. ルールや伝統を破ってでも、新しい道を切り開きたいですか？</p>
+            <label><input type="radio" name="q18" value="4"> はい</label>
+            <label><input type="radio" name="q18" value="1"> いいえ</label></div>
+        <div class="question-block"><p>19. 飽きっぽい方で、色々なことに興味を持ちますか？</p>
+            <label><input type="radio" name="q19" value="4"> はい</label>
+            <label><input type="radio" name="q19" value="1"> いいえ</label></div>
+        <div class="question-block"><p>20. 一人の時間で、未来の夢や空想に浸ることがよくありますか？</p>
+            <label><input type="radio" name="q20" value="4"> はい</label>
+            <label><input type="radio" name="q20" value="1"> いいえ</label></div>
+
+        <button type="submit">診断結果を見る！</button>
+    </form>
+
+    <div id="result">
+        </div>
+</div>
+
+<script>
+    document.getElementById('personality-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        let totalScore = 0;
+        const form = e.target;
+        const questions = Array.from({length: 20}, (_, i) => `q${i + 1}`);
+        let allAnswered = true;
+
+        // 全質問の回答をチェックし、点数を合計
+        questions.forEach(qName => {
+            const selected = form.elements[qName] ? form.elements[qName].value : null;
+            if (selected) {
+                totalScore += parseInt(selected, 10);
+            } else {
+                allAnswered = false;
+            }
+        });
+
+        const resultDiv = document.getElementById('result');
+
+        if (!allAnswered) {
+            resultDiv.style.display = 'block';
+            resultDiv.style.borderColor = '#d32f2f';
+            resultDiv.style.backgroundColor = '#fce4e4';
+            resultDiv.innerHTML = '<h2>回答漏れエラー</h2><p>全ての20個の質問に答えてください。</p>';
+            return;
+        }
+
+        let typeName = '';
+        let typeCatchphrase = '';
+        let typeDescription = '';
+        let characterPrompt = '';
+        
+        // 20問 x (1点 or 4点) = 20点(最小) ~ 80点(最大)
+        // 8つのタイプに分けるため、約7点刻みでロジックを分割
+
+        if (totalScore >= 74) {
+            // 最も行動的、論理的、共感的、創造的（全てに「はい」に近い）
+            typeName = '【覚醒の統率者】 - The Supreme Commander';
+            typeCatchphrase = '全てを兼ね備えた天才。理想と現実を繋ぐカリスマ的なリーダー。';
+            typeDescription = '**圧倒的な行動力**と**鋭い論理的思考**を両立させています。他者の気持ちを理解しつつも、揺るがない目標に向かって突き進む**完璧超人タイプ**です。あなたは多くの人を導き、不可能を可能にする力を持っています。';
+            characterPrompt = '未来的な鎧をまとった、凛々しい表情の指導者。片手に光る剣、背景に壮大な都市。';
+
+        } else if (totalScore >= 67) {
+            // 高い行動力、論理、共感、少し控えめな創造性
+            typeName = '【鉄壁の守護者】 - The Loyal Strategist';
+            typeCatchphrase = '冷静な判断力と温かい心を持つ、信頼と安心の柱。';
+            typeDescription = '**高い論理力**と**共感力**のバランスが取れています。あなたは常に公平で、チームの**安全と安定**を最優先します。リスク管理に優れ、人を支える役割で最も輝きます。';
+            characterPrompt = '騎士の鎧に身を包み、優しく微笑む人物。盾には紋章、背景は平和な城下町。';
+
+        } else if (totalScore >= 60) {
+            // 高い行動力、高い論理、控えめな感情、控えめな創造性
+            typeName = '【無双の開拓者】 - The Unstoppable Maverick';
+            typeCatchphrase = '結果こそ全て。目標に向かい一直線に突き進む、実力主義のトップランナー。';
+            typeDescription = '**極めて行動的で、論理的**。無駄を嫌い、最短距離で結果を出すことに特化しています。決断が早く、**ビジネスや勝負の世界**で圧倒的な強さを発揮します。感情論に流されない、**プロフェッショナル**です。';
+            characterPrompt = 'スーツ姿で、鋭い眼光を持つビジネスマン。高層ビルの最上階から街を見下ろしている。';
+
+        } else if (totalScore >= 53) {
+            // 高い行動力、控えめな論理、高い感情、控えめな創造性
+            typeName = '【情熱の伝道師】 - The Inspirational Speaker';
+            typeCatchphrase = '感情で人を動かすスペシャリスト。ムードメーカーで誰もが惹きつけられる。';
+            typeDescription = '**外向的で、非常に共感力が高い**あなたは、場を明るくし、人々の**モチベーション**を引き出す天才です。論理より感情を重視し、熱い想いで困難を乗り越えます。**コミュニケーション**の分野で最高の力を発揮します。';
+            characterPrompt = 'ステージ上でスポットライトを浴び、マイクを握り熱弁する華やかなエンターテイナー。';
+
+        } else if (totalScore >= 46) {
+            // 控えめな行動力、高い論理、控えめな感情、高い創造性
+            typeName = '【孤高の発明家】 - The Solitary Innovator';
+            typeCatchphrase = '既存の常識を打ち破る。静かに世界を変えるアイデアの泉。';
+            typeDescription = '**内向的ですが、論理と創造性がずば抜けています**。一人で深く考え、**誰も思いつかない斬新な解決策**を生み出します。ルーティンワークは苦手で、自由に発想できる環境が必要です。**研究職やアーティスト**の才能があります。';
+            characterPrompt = 'ボサボサの髪とメガネ、白衣を着た天才科学者。作業台には不思議な装置が並んでいる。';
+
+        } else if (totalScore >= 39) {
+            // 控えめな行動力、控えめな論理、高い感情、高い創造性
+            typeName = '【夢想の芸術家】 - The Whimsical Dreamer';
+            typeCatchphrase = '感性が全て。世界をカラフルに彩る、純粋で繊細な表現者。';
+            typeDescription = '**極めて感情豊かで、強い創造性**を持っています。人の心に寄り添い、それを**独自の芸術や表現**に昇華させます。集団行動より、内面の世界を大切にします。**繊細さ**ゆえに傷つきやすい一面もありますが、その感受性こそが才能です。';
+            characterPrompt = '大きなキャンバスに向かい、虹色の絵筆を持つ、憂いを帯びた表情の画家。';
+
+        } else if (totalScore >= 32) {
+            // 控えめな行動力、高い論理、控えめな感情、控えめな創造性
+            typeName = '【厳格な審判者】 - The Precise Examiner';
+            typeCatchphrase = '真実を追求し、誤りを見逃さない。体系化された知識の管理者。';
+            typeDescription = '**極めて論理的で、計画的**。ミスや曖昧さを許さず、物事を**体系的に整理**することに喜びを感じます。新しいことより、正確で確実な情報を好みます。**専門知識**を深めることで、誰にも揺るがない地位を築きます。';
+            characterPrompt = '図書館の書棚に囲まれ、眼鏡をかけ、古文書を熱心に読み解く冷静な学者。';
+
+        } else { // 20点〜31点
+            // 最も控えめ（内向的、感情的、非行動的、非論理的）
+            typeName = '【静穏の観測者】 - The Tranquil Observer';
+            typeCatchphrase = '世界の流れを静かに見つめる。自己の内面世界を深く探求する哲学者。';
+            typeDescription = '**内向的で、競争を嫌う平和主義者**。人の感情や自然の移り変わりなど、**目に見えない本質**を静かに見つめます。行動を起こすより、考えることを重視します。**独自の哲学**を持ち、他人から理解されにくいこともありますが、それがあなたの強みです。';
+            characterPrompt = '満月の夜、静かな湖畔で瞑想しているローブ姿の人物。背景は星空。';
+        }
+
+        // 結果を表示
+        resultDiv.style.display = 'block';
+        resultDiv.innerHTML = `
+            <h2>診断結果！あなたの隠れた才能は...</h2>
+            <p class="type-name">${typeName}</p>
+            <p class="type-catchphrase">${typeCatchphrase}</p>
+            <div class="type-description">
+                <p><strong>【詳細解説】</strong></p>
+                <p>${typeDescription}</p>
+                
+                <p style="margin-top: 20px; color: #d32f2f; font-weight: bold;">【キャラクターイラスト化のヒント】</p>
+                <p>このタイプをAIに描いてもらうための呪文（プロンプト）は、以下のようなものがおすすめです。</p>
+                <div class="prompt-text">${characterPrompt}</div>
+            </div>
+        `;
+    });
+</script>
+
+</body>
+</html>
