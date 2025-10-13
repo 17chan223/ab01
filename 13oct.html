@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>シンプル割り勘アプリ</title>
+    <title>割り勘清算アプリ</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -13,170 +13,242 @@
             align-items: flex-start;
             min-height: 100vh;
             margin: 0;
-            padding-top: 50px;
+            padding-top: 30px;
         }
-
         .container {
             background-color: #ffffff;
             padding: 30px;
             border-radius: 8px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
             width: 100%;
-            max-width: 400px;
-            text-align: center;
+            max-width: 600px;
         }
-
-        h1 {
-            color: #333;
-            margin-bottom: 30px;
+        h1, h2 { color: #333; text-align: center; }
+        .member-input-area { margin-bottom: 20px; }
+        .member-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
         }
-
-        .input-group {
-            text-align: left;
-            margin-bottom: 20px;
+        .member-row input[type="text"] { flex: 2; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+        .member-row input[type="number"] { flex: 3; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+        .member-row button { 
+            flex: 0 0 auto; 
+            padding: 5px 10px; 
+            background-color: #dc3545; 
+            color: white; 
+            border: none; 
+            border-radius: 4px; 
+            cursor: pointer;
         }
-
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-            color: #555;
-        }
-
-        input[type="number"] {
-            width: calc(100% - 20px);
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 16px;
-            box-sizing: border-box;
-        }
-
-        button {
+        .member-row button:hover { background-color: #c82333; }
+        button#add-member, button#calculate-settlement {
             width: 100%;
-            padding: 12px;
-            background-color: #007bff;
-            color: white;
+            padding: 10px;
+            margin-top: 10px;
             border: none;
             border-radius: 4px;
-            font-size: 18px;
+            font-size: 16px;
             cursor: pointer;
-            margin-top: 10px;
-            transition: background-color 0.3s;
         }
-
-        button:hover {
-            background-color: #0056b3;
+        button#add-member { background-color: #ffc107; color: #333; }
+        button#calculate-settlement { background-color: #007bff; color: white; }
+        .summary-area { margin-top: 30px; padding-top: 20px; border-top: 2px solid #eee; }
+        #settlement-result, #balance-summary { 
+            list-style: none; 
+            padding: 0; 
+            text-align: left;
+            margin-top: 15px;
         }
-
-        .result-area {
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 2px solid #eee;
+        #settlement-result li {
+            background-color: #e9f7ef;
+            padding: 10px;
+            margin-bottom: 8px;
+            border-left: 5px solid #28a745;
+            font-size: 1.1em;
         }
-
-        .result-area h2 {
-            color: #333;
-            margin-top: 0;
-            margin-bottom: 10px;
-        }
-
-        #result-message {
-            color: #777;
-            margin-bottom: 15px;
-        }
-
-        .large-text {
-            font-size: 2em;
-            font-weight: bold;
-            color: #28a745;
-            margin-top: 10px;
-        }
+        .balance-positive { color: #28a745; font-weight: bold; }
+        .balance-negative { color: #dc3545; font-weight: bold; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>自動割り勘計算</h1>
-
-        <div class="input-group">
-            <label for="total-amount">合計金額（円）:</label>
-            <input type="number" id="total-amount" min="0" value="3000" placeholder="例: 5500">
+        <h1>割り勘清算シミュレーター</h1>
+        <p>各人が支払った合計金額を入力してください。最低2名が必要です。</p>
+        
+        <div class="member-input-area" id="members-container">
+            <div class="member-row">
+                <input type="text" value="Aさん" placeholder="名前" class="member-name">
+                <input type="number" min="0" value="5000" placeholder="支払額（円）" class="member-paid-amount">
+                <button onclick="removeMember(this)">削除</button>
+            </div>
+            <div class="member-row">
+                <input type="text" value="Bさん" placeholder="名前" class="member-name">
+                <input type="number" min="0" value="1000" placeholder="支払額（円）" class="member-paid-amount">
+                <button onclick="removeMember(this)">削除</button>
+            </div>
         </div>
 
-        <div class="input-group">
-            <label for="number-of-people">人数:</label>
-            <input type="number" id="number-of-people" min="1" value="3" placeholder="例: 4">
-        </div>
+        <button id="add-member">メンバーを追加</button>
+        <button id="calculate-settlement">清算を計算する</button>
 
-        <button id="calculate-button">計算する</button>
-
-        <div class="result-area">
-            <h2>結果</h2>
-            <p id="result-message">金額と人数を入力して「計算する」ボタンを押してください。</p>
-            <p id="amount-per-person" class="large-text"></p>
+        <div class="summary-area">
+            <h2>清算サマリー</h2>
+            <p id="total-summary"></p>
+            <ul id="balance-summary"></ul>
+            <h2>精算指示（誰が誰に払うか）</h2>
+            <ul id="settlement-result"></ul>
         </div>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // HTML要素の取得
-            const totalAmountInput = document.getElementById('total-amount');
-            const numberOfPeopleInput = document.getElementById('number-of-people');
-            const calculateButton = document.getElementById('calculate-button');
-            const resultMessage = document.getElementById('result-message');
-            const amountPerPersonDisplay = document.getElementById('amount-per-person');
+            const membersContainer = document.getElementById('members-container');
+            const addMemberButton = document.getElementById('add-member');
+            const calculateButton = document.getElementById('calculate-settlement');
+            const totalSummary = document.getElementById('total-summary');
+            const balanceSummaryList = document.getElementById('balance-summary');
+            const settlementResultList = document.getElementById('settlement-result');
 
-            // 「計算する」ボタンがクリックされたときの処理を設定
-            calculateButton.addEventListener('click', calculateSplitBill);
+            addMemberButton.addEventListener('click', addMember);
+            calculateButton.addEventListener('click', calculateSettlement);
 
-            function calculateSplitBill() {
-                // 1. 入力値の取得と数値への変換
-                const totalAmount = Number(totalAmountInput.value);
-                const numberOfPeople = Number(numberOfPeopleInput.value);
-
-                // 2. 入力値のバリデーション（チェック）
-                if (isNaN(totalAmount) || totalAmount < 0) {
-                    resultMessage.textContent = 'エラー: 合計金額を正しく入力してください。';
-                    amountPerPersonDisplay.textContent = '';
-                    return;
-                }
-
-                if (isNaN(numberOfPeople) || numberOfPeople <= 0 || !Number.isInteger(numberOfPeople)) {
-                    resultMessage.textContent = 'エラー: 人数を1人以上の正の整数で入力してください。';
-                    amountPerPersonDisplay.textContent = '';
-                    return;
-                }
-
-                // 3. 割り勘の計算
-                const amountPerPerson = totalAmount / numberOfPeople;
-
-                // 4. 結果の表示（一般的な割り勘ルール：1円単位で切り上げ）
-                
-                // 一人当たりの金額を1円単位で切り上げ
-                const roundedAmount = Math.ceil(amountPerPerson);
-                
-                // 切り上げによって発生する端数（過不足）を計算
-                // 例: 5500円 / 3人 -> 1833.33... -> 1834円に切り上げ
-                // 1834 * 3 = 5502円。5500 - 5502 = -2 (2円多く払う)
-                const totalPaid = roundedAmount * numberOfPeople;
-                const difference = totalPaid - totalAmount; // 支払総額 - 合計金額
-
-                // 結果メッセージを設定
-                resultMessage.innerHTML = `
-                    **一人あたりの支払額（1円未満切り上げ）：**<br>
-                    <span style="font-weight: bold; color: #cc0000;">${roundedAmount.toLocaleString()} 円</span>
+            // メンバー追加機能
+            function addMember() {
+                const newRow = document.createElement('div');
+                newRow.className = 'member-row';
+                newRow.innerHTML = `
+                    <input type="text" value="Cさん" placeholder="名前" class="member-name">
+                    <input type="number" min="0" value="0" placeholder="支払額（円）" class="member-paid-amount">
+                    <button onclick="removeMember(this)">削除</button>
                 `;
-                
-                amountPerPersonDisplay.textContent = `${roundedAmount.toLocaleString()} 円`;
+                membersContainer.appendChild(newRow);
+            }
 
-                // 端数（お釣り）がある場合の追加メッセージ
-                if (difference > 0) {
-                    resultMessage.innerHTML += `<br>合計で**${difference.toLocaleString()}円**多く支払うことになります。`;
-                } else if (difference < 0) {
-                     // 実際には切り上げを使っているため difference < 0 は発生しないが、念のため
-                    resultMessage.innerHTML += `<br>合計で**${Math.abs(difference).toLocaleString()}円**足りなくなります。`;
+            // メンバー削除機能（グローバル関数として定義）
+            window.removeMember = function(buttonElement) {
+                const row = buttonElement.parentNode;
+                if (membersContainer.children.length > 2) { // 最低2人は残す
+                    membersContainer.removeChild(row);
                 } else {
-                     resultMessage.innerHTML += `<br>端数はありません。`;
+                    alert('清算には最低2人のメンバーが必要です。');
+                }
+            }
+
+            // 清算計算のメインロジック
+            function calculateSettlement() {
+                // 初期化
+                settlementResultList.innerHTML = '';
+                balanceSummaryList.innerHTML = '';
+                totalSummary.textContent = '';
+
+                const memberRows = Array.from(membersContainer.querySelectorAll('.member-row'));
+                if (memberRows.length < 2) {
+                    alert('清算には最低2人のメンバーが必要です。');
+                    return;
+                }
+
+                // 1. 各人の支払額を収集
+                const members = memberRows.map(row => {
+                    const name = row.querySelector('.member-name').value.trim() || '名無し';
+                    const amount = Number(row.querySelector('.member-paid-amount').value);
+
+                    if (isNaN(amount) || amount < 0) {
+                        alert(`エラー: ${name} の支払額が不正です。`);
+                        return null;
+                    }
+                    return { name, paid: amount, balance: 0 };
+                }).filter(m => m !== null);
+
+                if (members.length !== memberRows.length) return; // 不正な入力があれば処理を中断
+
+                // 2. 合計金額と平均金額を計算
+                const totalPaid = members.reduce((sum, member) => sum + member.paid, 0);
+                const averageShare = totalPaid / members.length;
+                
+                totalSummary.innerHTML = `**合計支払額:** ${totalPaid.toLocaleString()} 円 / **一人あたり:** ${averageShare.toFixed(2).toLocaleString()} 円`;
+
+                // 3. 各人の過不足額（貸し/借り）を計算
+                // balance > 0 : 貸し（多く払った人 = 受け取る人）
+                // balance < 0 : 借り（少なく払った人 = 支払う人）
+                members.forEach(member => {
+                    // toFixed(2) で小数点以下2桁に丸めてから、Number() で数値に戻す
+                    member.balance = Number((member.paid - averageShare).toFixed(2));
+                });
+                
+                // バランスサマリーの表示
+                members.forEach(member => {
+                    const li = document.createElement('li');
+                    const balance = member.balance;
+                    if (balance > 0.01) { // 貸し
+                        li.className = 'balance-positive';
+                        li.textContent = `${member.name}: ${balance.toLocaleString()} 円の**貸し** (受け取り)`;
+                    } else if (balance < -0.01) { // 借り
+                        li.className = 'balance-negative';
+                        li.textContent = `${member.name}: ${Math.abs(balance).toLocaleString()} 円の**借り** (支払い)`;
+                    } else { // ほぼ清算済み
+                        li.textContent = `${member.name}: 清算済み`;
+                    }
+                    balanceSummaryList.appendChild(li);
+                });
+
+                // 4. 清算の実行（最小取引アルゴリズム）
+                // 支払いが必要な人（借り）と受け取るべき人（貸し）を分ける
+                let debtors = members.filter(m => m.balance < -0.01).map(m => ({ ...m, owes: Math.abs(m.balance) }));
+                let creditors = members.filter(m => m.balance > 0.01).map(m => ({ ...m, gets: m.balance }));
+
+                // 借りている額が大きい順、またはランダムで並び替えても良い
+                debtors.sort((a, b) => b.owes - a.owes); 
+                creditors.sort((a, b) => b.gets - a.gets);
+
+                let transactionList = [];
+                let dIndex = 0;
+                let cIndex = 0;
+
+                while (dIndex < debtors.length && cIndex < creditors.length) {
+                    const debtor = debtors[dIndex];
+                    const creditor = creditors[cIndex];
+
+                    // 支払うべき額と受け取るべき額の小さい方を取引額とする
+                    const amountToTransfer = Math.min(debtor.owes, creditor.gets);
+                    
+                    if (amountToTransfer > 0.01) {
+                        transactionList.push({
+                            payer: debtor.name,
+                            recipient: creditor.name,
+                            amount: Number(amountToTransfer.toFixed(2)) // 小数点2桁に丸める
+                        });
+
+                        // 残額を更新
+                        debtor.owes -= amountToTransfer;
+                        creditor.gets -= amountToTransfer;
+                    }
+
+                    // 支払うべき額がなくなった/受け取るべき額がなくなった人を次のインデックスへ
+                    if (debtor.owes < 0.01) {
+                        dIndex++;
+                    }
+                    if (creditor.gets < 0.01) {
+                        cIndex++;
+                    }
+                }
+                
+                // 5. 最終的な清算結果の表示
+                if (transactionList.length === 0 && totalPaid > 0) {
+                    const li = document.createElement('li');
+                    li.textContent = '全員のバランスが取れています。清算は不要です。';
+                    settlementResultList.appendChild(li);
+                } else if (transactionList.length === 0 && totalPaid === 0) {
+                    const li = document.createElement('li');
+                    li.textContent = '支払いが行われていません。';
+                    settlementResultList.appendChild(li);
+                } else {
+                    transactionList.forEach(t => {
+                        const li = document.createElement('li');
+                        li.textContent = `${t.payer} が ${t.recipient} に ${t.amount.toLocaleString()} 円 支払う`;
+                        settlementResultList.appendChild(li);
+                    });
                 }
             }
         });
