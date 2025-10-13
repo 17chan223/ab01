@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>キラキラ☆アイドルメンバーカラー診断</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700;800&family=Kosugi+Maru&display=swap');
+
+        body {
+            font-family: 'M PLUS Rounded 1c', 'Kosugi Maru', sans-serif;
+            margin: 0;
+            background-color: #ffe8f4; /* 明るいピンク背景 */
+            color: #333;
+            /* キラキラ背景パターン */
+            background-image: radial-gradient(circle, #ffffff 1px, transparent 1px),
+                              radial-gradient(circle, #ffc0cb 1px, transparent 1px);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
+            padding: 20px 0;
+        }
+        .container {
+            max-width: 850px;
+            margin: auto;
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 25px;
+            box-shadow: 0 15px 40px rgba(255, 0, 100, 0.2);
+            border: 6px solid #ff4081; /* メインカラーの枠線 */
+        }
+        h1 {
+            text-align: center;
+            color: #d81b60; /* 濃いピンク */
+            margin-bottom: 30px;
+            font-size: 2.2em;
+            text-shadow: 2px 2px #f8bbd0;
+        }
+        /* フリル/リボン風の区切り線 */
+        h1::after {
+            content: "✦✦✦";
+            display: block;
+            margin-top: 10px;
+            color: #ff80ab;
+            font-size: 1.5em;
+            letter-spacing: 5px;
+        }
+        .description {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #6a1b9a;
+            font-weight: bold;
+        }
+        .question-block {
+            margin-bottom: 20px;
+            padding: 20px;
+            border: 4px solid #f06292; /* ピンクの太枠 */
+            border-radius: 12px;
+            background-color: #fffde7; /* クリーム色背景 */
+            box-shadow: 0 4px 0 #d81b60; /* 立体感 */
+            transition: transform 0.1s;
+        }
+        .question-block:hover {
+            transform: translateY(-2px);
+        }
+        .question-block p {
+            font-weight: 800;
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: #c2185b;
+            font-size: 1.1em;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 8px;
+            background-color: #fce4ec; /* 薄ピンク */
+            border: 1px solid #ff80ab;
+            transition: background-color 0.2s;
+            font-weight: 700;
+        }
+        label:hover {
+            background-color: #ffcdd2;
+        }
+        input[type="radio"] {
+            margin-right: 10px;
+            transform: scale(1.3);
+            accent-color: #d81b60; /* チェックマークの色 */
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 18px;
+            background-color: #ff80ab; /* ボタン色 */
+            color: white;
+            border: 4px solid #d81b60;
+            border-radius: 15px;
+            font-size: 1.4em;
+            font-weight: 900;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #d81b60; /* 立体感 */
+            transition: background-color 0.3s, transform 0.1s, box-shadow 0.1s;
+            margin-top: 40px;
+        }
+        button:hover {
+            background-color: #ff4081;
+            transform: translateY(2px);
+            box-shadow: 0 4px 0 #d81b60;
+        }
+        #result {
+            margin-top: 40px;
+            padding: 30px;
+            border: 6px dashed #ffab00; /* 黄色の点線枠 */
+            border-radius: 20px;
+            background-color: #fffaf0;
+            text-align: center;
+            display: none;
+        }
+        #result h2 {
+            color: #d81b60;
+            margin-top: 0;
+            font-size: 2.2em;
+            text-shadow: 1px 1px #ffc0cb;
+        }
+        #result .color-name {
+            font-size: 2.8em;
+            font-weight: 900;
+            margin: 15px 0;
+            text-shadow: 3px 3px 5px rgba(0,0,0,0.3);
+            padding: 10px 20px;
+            border-radius: 12px;
+            display: inline-block;
+            transform: rotate(-3deg); /* ポップな傾き */
+            border: 3px dashed #ffffff;
+            box-shadow: 0 0 15px rgba(255, 100, 150, 0.5);
+        }
+        #result .color-description {
+            text-align: left;
+            line-height: 1.7;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            border: 2px solid #ff80ab;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>キラキラ☆アイドルメンバーカラー診断</h1>
+    <p class="description">あなたのアイドルとしての役割を診断し、運命のメンバーカラーを決定します！</p>
+
+    <form id="personality-form">
+        
+        <div class="question-block"><p>1. ステージに立つとき、誰よりも目立とうとする意欲が湧きますか？</p>
+            <label><input type="radio" name="q1" value="4"> はい（意欲が湧く）</label>
+            <label><input type="radio" name="q1" value="1"> いいえ（調和を重視）</label></div>
+        <div class="question-block"><p>2. 困難な状況でも、自分の理想のパフォーマンスを諦めず貫きますか？</p>
+            <label><input type="radio" name="q2" value="4"> はい（貫く）</label>
+            <label><input type="radio" name="q2" value="1"> いいえ（柔軟に合わせる）</label></div>
+        <div class="question-block"><p>3. 自分のファンを増やし、グループを牽引したいという野心がありますか？</p>
+            <label><input type="radio" name="q3" value="4"> はい、ある</label>
+            <label><input type="radio" name="q3" value="1"> いいえ、支える役割で良い</label></div>
+        <div class="question-block"><p>4. 疲れていても、カメラが回るとすぐに最高の笑顔を作れますか？</p>
+            <label><input type="radio" name="q4" value="4"> はい、できる</label>
+            <label><input type="radio" name="q4" value="1"> いいえ、感情が表情に出やすい</label></div>
+
+        <div class="question-block"><p>5. 歌やダンスの練習は、誰かに言われなくても徹底的に繰り返しますか？</p>
+            <label><input type="radio" name="q5" value="4"> はい</label>
+            <label><input type="radio" name="q5" value="1"> いいえ</label></div>
+        <div class="question-block"><p>6. 自分の個性や魅力を、言葉や服装で表現するのが得意ですか？</p>
+            <label><input type="radio" name="q6" value="4"> はい、得意</label>
+            <label><input type="radio" name="q6" value="1"> いいえ、どちらかといえば苦手</label></div>
+        <div class="question-block"><p>7. 誰も思いつかないような、斬新なアイデアを企画するのが好きですか？</p>
+            <label><input type="radio" name="q7" value="4"> はい</label>
+            <label><input type="radio" name="q7" value="1"> いいえ</label></div>
+        <div class="question-block"><p>8. ステージの構成や照明など、技術的な部分に興味を持ち分析しますか？</p>
+            <label><input type="radio" name="q8" value="4"> はい</label>
+            <label><input type="radio" name="q8" value="1"> いいえ</label></div>
+
+        <div class="question-block"><p>9. 初めてのファンともすぐに打ち解け、親密なコミュニケーションが取れますか？</p>
+            <label><input type="radio" name="q9" value="4"> はい、得意</label>
+            <label><input type="radio" name="q9" value="1"> いいえ、人見知りする</label></div>
+        <div class="question-block"><p>10. 自分のSNSは、頻繁に更新しファンとの交流を重視しますか？</p>
+            <label><input type="radio" name="q10" value="4"> はい</label>
+            <label><input type="radio" name="q10" value="1"> いいえ</label></div>
+        <div class="question-block"><p>11. 握手会や特典会では、一人一人に合った言葉をかけてあげたいと思いますか？</p>
+            <label><input type="radio" name="q11" value="4"> はい、強く思う</label>
+            <label><input type="radio" name="q11" value="1"> いいえ、流れ作業になりがち</label></div>
+        <div class="question-block"><p>12. ライブでのMCやトークで、場を盛り上げたり仕切ったりするのが得意ですか？</p>
+            <label><input type="radio" name="q12" value="4"> はい、得意</label>
+            <label><input type="radio" name="q12" value="1"> いいえ、聞き役に回りたい</label></div>
+
+        <div class="question-block"><p>13. メンバーが悩んでいるとき、パフォーマンスよりメンタルケアを優先しますか？</p>
+            <label><input type="radio" name="q13" value="4"> はい</label>
+            <label><input type="radio" name="q13" value="1"> いいえ</label></div>
+        <div class="question-block"><p>14. グループのルールや決定には、自分の意見が違っても従うべきだと思いますか？</p>
+            <label><input type="radio" name="q14" value="4"> はい</label>
+            <label><input type="radio" name="q14" value="1"> いいえ</label></div>
+        <div class="question-block"><p>15. どんなに忙しくても、一人の時間で心を落ち着かせたいですか？</p>
+            <label><input type="radio" name="q15" value="4"> はい（一人の時間が必要）</label>
+            <label><input type="radio" name="q15" value="1"> いいえ（メンバーと一緒の方が落ち着く）</label></div>
+
+
+        <button type="submit">あなたのメンバーカラーを診断！</button>
+    </form>
+
+    <div id="result">
+        </div>
+</div>
+
+<script>
+    document.getElementById('personality-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        // 各カラーのスコアを初期化
+        const colorScores = {
+            '赤': 0, '青': 0, 'ピンク': 0, 'オレンジ': 0, '緑': 0,
+            '黄色': 0, '紫': 0, '黒': 0, '白': 0
+        };
+
+        // 質問の重み付けを定義 (ユーザーの解釈に基づいて作成)
+        const weights = {
+            // 情熱・プロ意識 (Q1-Q4)
+            q1: { 4: ['赤', '黒', 'ピンク'], 1: ['白', '緑', '紫'] },
+            q2: { 4: ['赤', 'オレンジ', '黒'], 1: ['白', '黄色', 'ピンク'] },
+            q3: { 4: ['赤', '青', 'ピンク'], 1: ['緑', '紫'] },
+            q4: { 4: ['ピンク', 'オレンジ', '白'], 1: ['黒', '青', '紫'] },
+            
+            // 技術・自己表現 (Q5-Q8)
+            q5: { 4: ['赤', '黒'], 1: ['ピンク', '緑'] },
+            q6: { 4: ['緑', '紫', 'ピンク'], 1: ['黄色', '白'] },
+            q7: { 4: ['黒', 'オレンジ', '赤'], 1: ['紫', '白'] },
+            q8: { 4: ['緑', '紫', '黄色'], 1: ['赤', '青', 'オレンジ'] },
+            
+            // カリスマ・ファンサービス (Q9-Q12)
+            q9: { 4: ['オレンジ', '黄色', '白', 'ピンク'], 1: ['黒', '紫', '緑'] },
+            q10: { 4: ['オレンジ', 'ピンク', '赤', '黄色'], 1: ['青', '黒', '緑', '紫'] },
+            q11: { 4: ['紫', '緑', '白', 'オレンジ'], 1: ['赤', '青', '黒'] },
+            q12: { 4: ['赤', 'オレンジ', 'ピンク', '黄色'], 1: ['黒', '白', '紫', '緑'] },
+            
+            // 協調性・内面 (Q13-Q15)
+            q13: { 4: ['緑', 'オレンジ', '黄色', '白'], 1: ['赤', '黒', '青'] },
+            q14: { 4: ['オレンジ', '黄色', 'ピンク', '緑'], 1: ['赤', '黒', '青'] },
+            q15: { 4: ['白', '黒', '紫'], 1: ['オレンジ', 'ピンク'] }
+        };
+
+        const form = e.target;
+        let allAnswered = true;
+
+        for (let i = 1; i <= 15; i++) {
+            const qName = `q${i}`;
+            const selected = form.elements[qName] ? form.elements[qName].value : null;
+
+            if (!selected) {
+                allAnswered = false;
+                break;
+            }
+            const value = parseInt(selected, 10);
+            
+            // スコアリング：回答がそのカラーの要素に繋がる場合、+1点
+            const relevantColors = weights[qName][value];
+            if (relevantColors) {
+                relevantColors.forEach(color => {
+                    colorScores[color] += 1;
+                });
+            }
+        }
+
+        const resultDiv = document.getElementById('result');
+
+        if (!allAnswered) {
+            resultDiv.style.display = 'block';
+            resultDiv.style.borderColor = '#dc3545';
+            resultDiv.style.backgroundColor = '#fce4e4';
+            resultDiv.innerHTML = '<h2>回答漏れエラー</h2><p>全ての15個の質問に答えてください。</p>';
+            return;
+        }
+        
+        // 最大スコアを計算し、同点の場合は全ての該当カラーをリストアップ
+        let maxScore = -1;
+        let resultColors = [];
+        
+        for (const color in colorScores) {
+            if (colorScores[color] > maxScore) {
+                maxScore = colorScores[color];
+                resultColors = [color]; // 最大スコアを更新
+            } else if (colorScores[color] === maxScore) {
+                resultColors.push(color); // 同点の場合に追加
+            }
+        }
+        
+        // 結果カラーが複数ある場合は、一つに絞るための「タイブレイク」ロジック
+        let finalColor = resultColors[0];
+        let colorDetails = {};
+        
+        // 9色それぞれの詳細情報（ユーザーの解釈を元に再定義）
+        const colorMap = {
+            '赤': { hex: '#FF0000', name: ' 熱血の **赤（レッド）** ', role: '不動のリーダー、センター', description: '圧倒的な情熱と野心、そして卓越した統率力でグループを牽引します。自己表現への意欲も高く、常にトップを目指す絶対的なエースです。', score: colorScores['赤'] },
+            '青': { hex: '#0000FF', name: ' 知性の **青（ブルー）** ', role: '知的、クール担当', description: '冷静な分析力とプロ意識を持つ、クールな知性派。感情に流されず、高い技術を追求します。内面はストイックで、周りに依存しない独立心を持ちます。', score: colorScores['青'] },
+            'ピンク': { hex: '#FF69B4', name: ' 愛され **ピンク** ', role: 'キュートで親しみやすい', description: '愛嬌と天性の笑顔でファンを魅了するアイドル性の塊。人との交流を重視し、明るい雰囲気を作り出します。誰からも愛されるグループの華やかな存在です。', score: colorScores['ピンク'] },
+            'オレンジ': { hex: '#FFA500', name: ' 太陽の **オレンジ** ', role: 'ムードメーカー、太陽のように明るい', description: '常にポジティブで、周囲を明るく照らす太陽のような存在。協調性があり、グループの雰囲気を大切にします。親しみやすいコミュニケーションでファンと深く繋がります。', score: colorScores['オレンジ'] },
+            '緑': { hex: '#008000', name: ' 癒やしの **緑（グリーン）** ', role: '和ませ担当で努力家', description: '協調性を重んじ、メンバーのメンタルをケアする癒やし系。目立たないところで技術を磨く努力家でもあり、謙虚にグループを支えるなくてはならない存在です。', score: colorScores['緑'] },
+            '黄色': { hex: '#FFD700', name: ' 元気な **黄（イエロー）** ', role: '明るく親しみやすい、バラエティ向け', description: '抜群のトークセンスと親しみやすさで、バラエティやMCで力を発揮。明るくオープンな性格で、その場にいる全員を楽しませます。愛すべきグループの元気印です。', score: colorScores['黄色'] },
+            '紫': { hex: '#800080', name: ' 神秘の **紫（パープル）** ', role: 'ミステリアスで一匹狼', description: '独特な世界観と高い自己表現力を持つ孤高のアーティスト。他者に依存せず、一人で静かに世界観を追求します。そのミステリアスな魅力が、コアなファンを深く惹きつけます。', score: colorScores['紫'] },
+            '黒': { hex: '#111111', name: ' クールな **黒（ブラック）** ', role: 'クールな一匹狼、実力主義', description: '強い野心と高い技術を持つ、ストイックな実力派。馴れ合いを嫌い、パフォーマンスの質を最優先します。クールで近寄りがたい雰囲気が、カリスマ性を際立たせます。', score: colorScores['黒'] },
+            '白': { hex: '#F0F8FF', name: ' ピュアな **白（ホワイト）** ', role: '天使のようでピュア', description: '競争や主張を好まない、ピュアで繊細な存在。柔らかな雰囲気が、ファンやメンバーに安らぎを与えます。静かにグループを支える、天使のような癒やし担当です。', score: colorScores['白'], textColor: '#333', borderColor: '2px solid #ff80ab' }
+        };
+
+        if (resultColors.length > 1) {
+             // タイブレイク：同点の場合、最も多く票を集めた色のうち、赤、黒、紫などの「強い色」を優先
+            const priorityOrder = ['赤', '黒', '紫', '青', 'ピンク', '黄色', 'オレンジ', '緑', '白'];
+            for (const pColor of priorityOrder) {
+                if (resultColors.includes(pColor)) {
+                    finalColor = pColor;
+                    break;
+                }
+            }
+        }
+        
+        colorDetails = colorMap[finalColor];
+        
+        // 結果表示
+        resultDiv.style.display = 'block';
+        resultDiv.style.backgroundColor = '#fffaf0';
+        resultDiv.innerHTML = `
+            <h2>あなたのアイドルとしてのメンバーカラーは...</h2>
+            <p class="color-name" style="background-color: ${colorDetails.hex}; color: ${colorDetails.textColor || 'white'}; border: ${colorDetails.borderColor || '3px solid white'};">
+                ${colorDetails.name}
+            </p>
+            <div class="color-description">
+                <p><strong>【あなたのアイドル内での役割】</strong></p>
+                <p>**${colorDetails.role}**</p>
+                
+                <p style="margin-top: 20px;"><strong>【アイドルとしての魅力】</strong></p>
+                <p>${colorDetails.description}</p>
+                
+                <p style="margin-top: 20px; font-size: 0.9em; color: #6c757d;">
+                    ※あなたの解釈に基づいた各カラーのスコア（全15点満点）:<br>
+                    赤: ${colorMap['赤'].score}点, 青: ${colorMap['青'].score}点, ピンク: ${colorMap['ピンク'].score}点, オレンジ: ${colorMap['オレンジ'].score}点, 緑: ${colorMap['緑'].score}点,<br>
+                    黄色: ${colorMap['黄色'].score}点, 紫: ${colorMap['紫'].score}点, 黒: ${colorMap['黒'].score}点, 白: ${colorMap['白'].score}点
+                </p>
+            </div>
+        `;
+    });
+</script>
+
+</body>
+</html>
