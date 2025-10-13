@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>割り勘精算 — 誰が誰にいくら払うか自動計算</title>
+  <title>割り勘精算 — 誰が誰にいくら払うか自動計算（安定版）</title>
   <style>
     :root{--bg:#0f1724;--card:#0b1220;--muted:#9aa6bf;--accent:#7dd3fc;--glass:rgba(255,255,255,0.04);--radius:12px}
     *{box-sizing:border-box;font-family:Inter, system-ui, -apple-system, "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Segoe UI", Roboto, "Helvetica Neue", Arial}
@@ -14,7 +14,7 @@
     .grid{display:grid;grid-template-columns:1fr 360px;gap:18px;margin-top:14px}
     .card{background:var(--card);padding:14px;border-radius:12px}
     label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
-    input[type=text], input[type=number], select{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:var(--glass);color:inherit}
+    input[type=text], input[type=number], select, textarea{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:var(--glass);color:inherit}
     .btn{display:inline-block;padding:10px 12px;border-radius:10px;border:none;cursor:pointer}
     .primary{background:linear-gradient(90deg,var(--accent),#60a5fa);color:#06202b}
     .ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted)}
@@ -25,6 +25,9 @@
     .result{display:flex;align-items:center;justify-content:space-between;padding:10px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01))}
     .muted{color:var(--muted);font-size:13px}
     .small{font-size:12px;color:var(--muted)}
+    /* simple modal for non-blocking input */
+    .modal{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);background:var(--card);padding:12px;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,0.6);z-index:60;width:420px;max-width:90%}
+    .overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:50}
     @media (max-width:880px){.grid{grid-template-columns:1fr}}
   </style>
 </head>
@@ -32,7 +35,7 @@
   <div class="wrap">
     <header>
       <svg width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="3" width="20" height="18" rx="4" fill="#7dd3fc"/></svg>
-      <h1>割り勘精算 — 誰が誰にいくら払うか自動計算</h1>
+      <h1>割り勘精算 — 誰が誰にいくら払うか自動計算（安定版）</h1>
     </header>
 
     <div class="grid">
@@ -40,8 +43,8 @@
         <div class="card">
           <label>会計（支払履歴）を入力してください</label>
           <div style="display:flex;gap:8px;align-items:center">
-            <button class="btn ghost" id="addTx">＋ 会計を追加</button>
-            <button class="btn ghost" id="autoDetect">名前を自動検出して集計</button>
+            <button type="button" class="btn ghost" id="addTx">＋ 会計を追加</button>
+            <button type="button" class="btn ghost" id="openAutoDetect">名前をまとめて入力</button>
             <select id="roundMode" style="width:200px">
               <option value="round2">端数: 小数点2桁で表示（デフォルト）</option>
               <option value="int">端数: 円単位で丸め（四捨五入）</option>
@@ -53,9 +56,9 @@
           </div>
 
           <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap">
-            <button class="btn primary" id="settle">精算を計算</button>
-            <button class="btn ghost" id="clear">クリア</button>
-            <button class="btn ghost" id="exportCsv">CSV をダウンロード</button>
+            <button type="button" class="btn primary" id="settle">精算を計算</button>
+            <button type="button" class="btn ghost" id="clear">クリア</button>
+            <button type="button" class="btn ghost" id="exportCsv">CSV をダウンロード</button>
           </div>
 
           <p class="small" style="margin-top:10px">使い方: 支払った人の名前と金額を1行ずつ入力して「精算を計算」を押すと、参加者全員が等しく負担するように誰が誰にいくら支払うかの一覧を表示します。</p>
@@ -71,36 +74,66 @@
     </div>
   </div>
 
+  <!-- 非ブロッキングの名前入力モーダル（以前の prompt の代替） -->
+  <div id="overlay" class="overlay" style="display:none"></div>
+  <div id="modal" class="modal" style="display:none">
+    <label>参加者名をカンマ区切りで入力してください（例: A,B,C）</label>
+    <textarea id="modalNames" rows="3" placeholder="A,B,C"></textarea>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:8px">
+      <button type="button" class="btn ghost" id="modalCancel">キャンセル</button>
+      <button type="button" class="btn primary" id="modalOk">反映</button>
+    </div>
+  </div>
+
   <script>
     const txList = document.getElementById('txList');
     const summary = document.getElementById('summary');
     const roundMode = document.getElementById('roundMode');
+    const overlay = document.getElementById('overlay');
+    const modal = document.getElementById('modal');
+    const modalNames = document.getElementById('modalNames');
+
+    function safeCall(fn){
+      try{ fn(); }catch(e){
+        console.error(e);
+        summary.innerHTML = `<div class="muted">エラーが発生しました: ${escapeHtml(String(e.message || e))}</div>`;
+      }
+    }
 
     function createTxRow(payer = '', amount = ''){
       const wrap = document.createElement('div'); wrap.className = 'tx';
       const nameInput = document.createElement('input'); nameInput.type='text'; nameInput.placeholder='支払った人の名前'; nameInput.value = payer; nameInput.style.width='55%';
       const amtInput = document.createElement('input'); amtInput.type='number'; amtInput.min='0'; amtInput.placeholder='金額'; amtInput.value = amount; amtInput.style.width='35%';
-      const remove = document.createElement('button'); remove.className='remove'; remove.textContent='削除'; remove.onclick=()=>{ wrap.remove(); };
+      const remove = document.createElement('button'); remove.type='button'; remove.className='remove'; remove.textContent='削除'; remove.onclick=()=>{ wrap.remove(); };
       wrap.appendChild(nameInput); wrap.appendChild(amtInput); wrap.appendChild(remove);
       txList.appendChild(wrap);
       return wrap;
     }
 
-    // 初期サンプル
-    createTxRow('A', '1200');
-    createTxRow('B', '800');
-    createTxRow('C', '0');
+    // 初期サンプル（少なめ）
+    (function init(){
+      txList.innerHTML = '';
+      createTxRow('A', '1200');
+      createTxRow('B', '800');
+      createTxRow('C', '0');
+    })();
 
     document.getElementById('addTx').addEventListener('click', ()=> createTxRow('', ''));
     document.getElementById('clear').addEventListener('click', ()=>{ txList.innerHTML=''; summary.innerHTML='<div class="muted">まだ精算されていません。会計を入力して「精算を計算」を押してください。</div>'; });
 
-    document.getElementById('autoDetect').addEventListener('click', ()=>{
-      // 名前を自動検出して、トランザクション数に合わせて入力欄を用意
-      const names = prompt('カンマ区切りで参加者名を入力してください（例: A,B,C）');
-      if(!names) return;
-      const arr = names.split(',').map(s=>s.trim()).filter(Boolean);
-      txList.innerHTML='';
-      arr.forEach(_=> createTxRow('',''));
+    document.getElementById('openAutoDetect').addEventListener('click', ()=>{
+      overlay.style.display = 'block'; modal.style.display = 'block'; modalNames.value = '';
+    });
+    document.getElementById('modalCancel').addEventListener('click', ()=>{ overlay.style.display = 'none'; modal.style.display = 'none'; });
+    document.getElementById('modalOk').addEventListener('click', ()=>{
+      const text = modalNames.value || '';
+      overlay.style.display = 'none'; modal.style.display = 'none';
+      const arr = text.split(',').map(s=>s.trim()).filter(Boolean);
+      if(arr.length === 0) return;
+      // 人名を用意して、既存の行数に合わせる（上限は安全のため1000）
+      const max = Math.min(arr.length, 1000);
+      txList.innerHTML = '';
+      for(let i=0;i<max;i++) createTxRow(arr[i], '');
     });
 
     function aggregatePayments(){
@@ -109,78 +142,83 @@
       rows.forEach(r=>{
         const name = r.querySelector('input[type=text]').value.trim() || '名無し';
         const amt = Number(r.querySelector('input[type=number]').value) || 0;
-        const key = name;
-        map.set(key, (map.get(key) || 0) + amt);
+        map.set(name, (map.get(name) || 0) + amt);
       });
       return map; // name -> total paid
     }
 
     function computeSettlements(){
-      const paidMap = aggregatePayments();
-      const people = Array.from(paidMap.keys()).sort();
-      if(people.length === 0){ summary.innerHTML = '<div class="muted">参加者がいません。</div>'; return; }
+      try{
+        const paidMap = aggregatePayments();
+        const people = Array.from(paidMap.keys()).sort();
+        if(people.length === 0){ summary.innerHTML = '<div class="muted">参加者がいません。</div>'; return null; }
 
-      const totals = people.map(name=>({name, paid: paidMap.get(name)}));
-      const totalAll = totals.reduce((s,p)=>s+p.paid,0);
-      const perShare = totalAll / people.length;
+        const totals = people.map(name=>({name, paid: paidMap.get(name)}));
+        const totalAll = totals.reduce((s,p)=>s+p.paid,0);
+        const perShare = totalAll / people.length;
 
-      // net balance: positive => should receive money; negative => owes money
-      const nets = totals.map(p=>({name:p.name, net: p.paid - perShare})).filter(p=> Math.abs(p.net) > 1e-9);
+        // net balance: positive => should receive money; negative => owes money
+        const nets = totals.map(p=>({name:p.name, net: p.paid - perShare})).filter(p=> Math.abs(p.net) > 1e-9);
 
-      // separate creditors and debtors
-      const creditors = nets.filter(p=> p.net > 0).map(p=>({name:p.name, amt: p.net})).sort((a,b)=> b.amt - a.amt);
-      const debtors  = nets.filter(p=> p.net < 0).map(p=>({name:p.name, amt: -p.net})).sort((a,b)=> b.amt - a.amt);
+        // separate creditors and debtors
+        const creditors = nets.filter(p=> p.net > 0).map(p=>({name:p.name, amt: p.net})).sort((a,b)=> b.amt - a.amt);
+        const debtors  = nets.filter(p=> p.net < 0).map(p=>({name:p.name, amt: -p.net})).sort((a,b)=> b.amt - a.amt);
 
-      const transfers = [];
-      let i = 0, j = 0;
-      while(i < debtors.length && j < creditors.length){
-        const owe = debtors[i].amt;
-        const give = creditors[j].amt;
-        const t = Math.min(owe, give);
-        transfers.push({from: debtors[i].name, to: creditors[j].name, amount: t});
-        debtors[i].amt -= t;
-        creditors[j].amt -= t;
-        if(debtors[i].amt <= 1e-9) i++;
-        if(creditors[j].amt <= 1e-9) j++;
-      }
+        const transfers = [];
+        let i = 0, j = 0;
+        // two-pointer greedy settlement (linear in number of non-zero nets)
+        while(i < debtors.length && j < creditors.length){
+          const owe = debtors[i].amt;
+          const give = creditors[j].amt;
+          const t = Math.min(owe, give);
+          // push a transfer
+          transfers.push({from: debtors[i].name, to: creditors[j].name, amount: t});
+          debtors[i].amt -= t;
+          creditors[j].amt -= t;
+          if(debtors[i].amt <= 1e-9) i++;
+          if(creditors[j].amt <= 1e-9) j++;
+        }
 
-      // For display -- rounding mode
-      const useInt = (roundMode.value === 'int');
-      function fmt(v){ if(useInt) return Math.round(v); return Math.round(v*100)/100; }
+        // For display -- rounding mode
+        const useInt = (roundMode.value === 'int');
+        function fmt(v){ if(useInt) return Math.round(v); return Math.round(v*100)/100; }
 
-      // build result HTML
-      let html = '';
-      html += `<div class="muted">総額: ${formatNumber(totalAll)} / 人数: ${people.length} / 1人あたり: ${formatNumber(perShare)}</div>`;
+        // build result HTML
+        let html = '';
+        html += `<div class="muted">総額: ${formatNumber(totalAll)} / 人数: ${people.length} / 1人あたり: ${formatNumber(useInt? Math.round(perShare): Math.round(perShare*100)/100)}</div>`;
 
-      html += '<div style="margin-top:10px"><strong>個別支払（集計）</strong>';
-      totals.forEach(p=> html += `<div class="result"><div>${escapeHtml(p.name)}</div><div>${formatNumber(p.paid)}</div></div>`);
-      html += '</div>';
-
-      if(transfers.length === 0){
-        html += '<div class="muted" style="margin-top:10px">精算不要：すでに均等です。</div>';
-      } else {
-        html += '<div style="margin-top:12px"><strong>精算一覧 — 誰が誰にいくら支払うか</strong>';
-        transfers.forEach(t=>{
-          html += `<div class="result"><div>${escapeHtml(t.from)} → ${escapeHtml(t.to)}</div><div>${formatNumber(fmt(t.amount))}</div></div>`;
-        });
+        html += '<div style="margin-top:10px"><strong>個別支払（集計）</strong>';
+        totals.forEach(p=> html += `<div class="result"><div>${escapeHtml(p.name)}</div><div>${formatNumber(p.paid)}</div></div>`);
         html += '</div>';
+
+        if(transfers.length === 0){
+          html += '<div class="muted" style="margin-top:10px">精算不要：すでに均等です。</div>';
+        } else {
+          html += '<div style="margin-top:12px"><strong>精算一覧 — 誰が誰にいくら支払うか</strong>';
+          transfers.forEach(t=>{
+            html += `<div class="result"><div>${escapeHtml(t.from)} → ${escapeHtml(t.to)}</div><div>${formatNumber(fmt(t.amount))}</div></div>`;
+          });
+          html += '</div>';
+        }
+
+        // small residual check
+        const distributedSum = transfers.reduce((s,t)=> s + t.amount, 0);
+        const netsSum = nets.reduce((s,p)=> s + Math.abs(p.net), 0);
+        const residual = Math.abs(netsSum - distributedSum);
+        if(residual > 0.001) html += `<div class="muted">注意: 四捨五入等のために小さな端数（${formatNumber(residual)}）が発生しています。</div>`;
+
+        summary.innerHTML = html;
+        return {people, totals, totalAll, perShare, transfers};
+      }catch(e){
+        console.error(e);
+        summary.innerHTML = `<div class="muted">計算中にエラーが発生しました: ${escapeHtml(String(e.message || e))}</div>`;
+        return null;
       }
-
-      // check small residual due to rounding
-      const distributedSum = transfers.reduce((s,t)=> s + t.amount, 0);
-      const residual = Math.abs(distributedSum - nets.reduce((s,p)=> s + Math.abs(p.net), 0)) / 2; // shouldn't be > small
-      if(residual > 0.001) html += `<div class="muted">注意: 四捨五入等のために小さな端数（${formatNumber(residual)})が発生しています。</div>`;
-
-      summary.innerHTML = html;
-
-      return {people, totals, totalAll, perShare, transfers};
     }
 
-    document.getElementById('settle').addEventListener('click', ()=>{
-      computeSettlements();
-    });
+    document.getElementById('settle').addEventListener('click', ()=> safeCall(()=> computeSettlements()));
 
-    document.getElementById('exportCsv').addEventListener('click', ()=>{
+    document.getElementById('exportCsv').addEventListener('click', ()=> safeCall(()=>{
       const res = computeSettlements();
       if(!res) return;
       const rows = [];
@@ -193,16 +231,23 @@
       rows.push(['精算元','精算先','金額']);
       res.transfers.forEach(t=> rows.push([t.from, t.to, String(t.amount)]));
 
-      const csv = rows.map(r=> r.map(c=>`"${String(c).replace(/"/g,'""') }"`).join(',')).join('
-');
+      const csv = rows.map(r=> r.map(c=>`"${String(c).replace(/"/g,'""') }"`).join(',')).join('\n');
       const blob = new Blob([csv], {type: 'text/csv'});
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a'); a.href = url; a.download = 'settlement.csv'; a.click();
       URL.revokeObjectURL(url);
-    });
+    }));
 
     function formatNumber(n){ if(typeof n !== 'number') n = Number(n) || 0; return Number.isInteger(n) ? n.toString() : n.toFixed(2); }
     function escapeHtml(s){ return String(s).replace(/[&<>\"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+
+    // small safety: avoid accidental long loops - limit created rows
+    const MAX_ROWS = 2000;
+    const originalCreate = createTxRow;
+    createTxRow = function(payer = '', amount = ''){
+      if(txList.querySelectorAll('.tx').length >= MAX_ROWS) return null;
+      return originalCreate(payer, amount);
+    };
   </script>
 </body>
 </html>
