@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>割り勘清算アプリ</title>
+    <title>割り勘清算＆追跡アプリ</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -13,7 +13,7 @@
             align-items: flex-start;
             min-height: 100vh;
             margin: 0;
-            padding-top: 30px;
+            padding: 30px;
         }
         .container {
             background-color: #ffffff;
@@ -21,9 +21,16 @@
             border-radius: 8px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
             width: 100%;
-            max-width: 600px;
+            max-width: 800px; /* 幅を広げて情報を見やすく */
         }
         h1, h2 { color: #333; text-align: center; }
+        
+        /* 期限設定エリア */
+        .limit-area { text-align: center; margin-bottom: 20px; padding: 15px; border: 1px dashed #ccc; border-radius: 5px;}
+        .limit-area label, .limit-area input { font-size: 1.1em; }
+        .limit-area input { padding: 5px; border: 1px solid #aaa; border-radius: 3px; }
+
+        /* メンバー入力エリア */
         .member-input-area { margin-bottom: 20px; }
         .member-row {
             display: flex;
@@ -42,7 +49,8 @@
             border-radius: 4px; 
             cursor: pointer;
         }
-        .member-row button:hover { background-color: #c82333; }
+        
+        /* ボタン */
         button#add-member, button#calculate-settlement {
             width: 100%;
             padding: 10px;
@@ -53,39 +61,83 @@
             cursor: pointer;
         }
         button#add-member { background-color: #ffc107; color: #333; }
-        button#calculate-settlement { background-color: #007bff; color: white; }
+        button#calculate-settlement { background-color: #007bff; color: white; margin-bottom: 20px;}
+
+        /* 結果エリア */
         .summary-area { margin-top: 30px; padding-top: 20px; border-top: 2px solid #eee; }
-        #settlement-result, #balance-summary { 
+        #settlement-result { 
             list-style: none; 
             padding: 0; 
             text-align: left;
             margin-top: 15px;
         }
+        
+        /* 精算リストのスタイル */
         #settlement-result li {
             background-color: #e9f7ef;
-            padding: 10px;
-            margin-bottom: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
             border-left: 5px solid #28a745;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             font-size: 1.1em;
+            transition: background-color 0.3s;
         }
+        .paid-item {
+            background-color: #d4edda; /* 支払済みの背景色 */
+            border-left-color: #218838;
+            text-decoration: line-through;
+            color: #6c757d;
+        }
+        .overdue-item {
+            background-color: #f8d7da; /* 期日超過の背景色 */
+            border-left-color: #dc3545;
+        }
+
+        /* 支払い詳細 */
+        .payment-details {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            font-size: 0.9em;
+        }
+        .payment-details input[type="date"] {
+            padding: 4px;
+        }
+
+        /* バランスサマリー */
+        .balance-summary { list-style: none; padding: 0; text-align: left;}
         .balance-positive { color: #28a745; font-weight: bold; }
         .balance-negative { color: #dc3545; font-weight: bold; }
+        .balance-summary li { margin-bottom: 5px; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>割り勘清算シミュレーター</h1>
-        <p>各人が支払った合計金額を入力してください。最低2名が必要です。</p>
+        <h1>割り勘清算＆追跡アプリ</h1>
         
+        <div class="limit-area">
+            <label for="payment-deadline">清算の期日を設定:</label>
+            <input type="date" id="payment-deadline">
+            <p id="deadline-status"></p>
+        </div>
+
+        <h2>支払額の入力</h2>
         <div class="member-input-area" id="members-container">
             <div class="member-row">
                 <input type="text" value="Aさん" placeholder="名前" class="member-name">
-                <input type="number" min="0" value="5000" placeholder="支払額（円）" class="member-paid-amount">
+                <input type="number" min="0" value="7000" placeholder="支払額（円）" class="member-paid-amount">
                 <button onclick="removeMember(this)">削除</button>
             </div>
             <div class="member-row">
                 <input type="text" value="Bさん" placeholder="名前" class="member-name">
-                <input type="number" min="0" value="1000" placeholder="支払額（円）" class="member-paid-amount">
+                <input type="number" min="0" value="2000" placeholder="支払額（円）" class="member-paid-amount">
+                <button onclick="removeMember(this)">削除</button>
+            </div>
+            <div class="member-row">
+                <input type="text" value="Cさん" placeholder="名前" class="member-name">
+                <input type="number" min="0" value="0" placeholder="支払額（円）" class="member-paid-amount">
                 <button onclick="removeMember(this)">削除</button>
             </div>
         </div>
@@ -96,161 +148,245 @@
         <div class="summary-area">
             <h2>清算サマリー</h2>
             <p id="total-summary"></p>
-            <ul id="balance-summary"></ul>
-            <h2>精算指示（誰が誰に払うか）</h2>
+            <ul class="balance-summary" id="balance-summary"></ul>
+            <h2>精算指示と支払い追跡</h2>
             <ul id="settlement-result"></ul>
         </div>
     </div>
 
     <script>
+        // グローバルに取引データを保持
+        let currentTransactions = [];
+
         document.addEventListener('DOMContentLoaded', () => {
             const membersContainer = document.getElementById('members-container');
             const addMemberButton = document.getElementById('add-member');
             const calculateButton = document.getElementById('calculate-settlement');
+            const deadlineInput = document.getElementById('payment-deadline');
+            const deadlineStatus = document.getElementById('deadline-status');
             const totalSummary = document.getElementById('total-summary');
             const balanceSummaryList = document.getElementById('balance-summary');
             const settlementResultList = document.getElementById('settlement-result');
 
             addMemberButton.addEventListener('click', addMember);
             calculateButton.addEventListener('click', calculateSettlement);
+            deadlineInput.addEventListener('change', updateDeadlineStatus);
 
-            // メンバー追加機能
+            // 期限ステータスを更新
+            function updateDeadlineStatus() {
+                const deadline = deadlineInput.value;
+                if (!deadline) {
+                    deadlineStatus.textContent = '清算期日が設定されていません。';
+                    deadlineStatus.style.color = '#777';
+                    return;
+                }
+                
+                const deadlineDate = new Date(deadline);
+                const today = new Date();
+                today.setHours(0, 0, 0, 0); // 時刻を無視
+
+                const diffTime = deadlineDate.getTime() - today.getTime();
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                if (diffDays < 0) {
+                    deadlineStatus.textContent = '⚠︎ 清算期日が ' + Math.abs(diffDays) + '日超過しています！';
+                    deadlineStatus.style.color = '#dc3545';
+                } else if (diffDays === 0) {
+                    deadlineStatus.textContent = '本日が清算期日です。';
+                    deadlineStatus.style.color = '#ffc107';
+                } else {
+                    deadlineStatus.textContent = `清算期日まで残り ${diffDays} 日です。`;
+                    deadlineStatus.style.color = '#28a745';
+                }
+                
+                // 取引リストの期日超過をチェック
+                renderSettlementList(); 
+            }
+            
+            // メンバー追加
             function addMember() {
                 const newRow = document.createElement('div');
                 newRow.className = 'member-row';
                 newRow.innerHTML = `
-                    <input type="text" value="Cさん" placeholder="名前" class="member-name">
+                    <input type="text" value="Dさん" placeholder="名前" class="member-name">
                     <input type="number" min="0" value="0" placeholder="支払額（円）" class="member-paid-amount">
                     <button onclick="removeMember(this)">削除</button>
                 `;
                 membersContainer.appendChild(newRow);
             }
 
-            // メンバー削除機能（グローバル関数として定義）
+            // メンバー削除（グローバル関数として定義）
             window.removeMember = function(buttonElement) {
                 const row = buttonElement.parentNode;
-                if (membersContainer.children.length > 2) { // 最低2人は残す
+                if (membersContainer.children.length > 2) { 
                     membersContainer.removeChild(row);
                 } else {
                     alert('清算には最低2人のメンバーが必要です。');
                 }
             }
 
-            // 清算計算のメインロジック
+            // 支払い状況を更新する関数
+            window.updatePaymentStatus = function(index, checkboxElement) {
+                const isPaid = checkboxElement.checked;
+                const paidDateInput = checkboxElement.closest('li').querySelector('.paid-date');
+
+                if (currentTransactions[index]) {
+                    currentTransactions[index].isPaid = isPaid;
+                    paidDateInput.disabled = !isPaid;
+                    
+                    if (isPaid && !paidDateInput.value) {
+                        // 支払済みにチェックを入れたが日付がない場合、今日の日付を自動入力
+                        paidDateInput.valueAsDate = new Date();
+                    } else if (!isPaid) {
+                        // 未払いに戻した場合、日付をクリア
+                        paidDateInput.value = '';
+                    }
+                    
+                    renderSettlementList();
+                }
+            }
+
+            // 支払日を記録する関数
+            window.recordPaidDate = function(index, dateElement) {
+                if (currentTransactions[index]) {
+                    currentTransactions[index].paidDate = dateElement.value;
+                    renderSettlementList();
+                }
+            }
+
+            // 清算計算のメインロジック (前回のロジックと同じ)
             function calculateSettlement() {
-                // 初期化
                 settlementResultList.innerHTML = '';
                 balanceSummaryList.innerHTML = '';
                 totalSummary.textContent = '';
+                currentTransactions = []; // 取引リストをリセット
 
                 const memberRows = Array.from(membersContainer.querySelectorAll('.member-row'));
-                if (memberRows.length < 2) {
-                    alert('清算には最低2人のメンバーが必要です。');
-                    return;
-                }
+                if (memberRows.length < 2) return;
 
-                // 1. 各人の支払額を収集
                 const members = memberRows.map(row => {
                     const name = row.querySelector('.member-name').value.trim() || '名無し';
                     const amount = Number(row.querySelector('.member-paid-amount').value);
-
-                    if (isNaN(amount) || amount < 0) {
-                        alert(`エラー: ${name} の支払額が不正です。`);
-                        return null;
-                    }
+                    if (isNaN(amount) || amount < 0) { alert(`エラー: ${name} の支払額が不正です。`); return null; }
                     return { name, paid: amount, balance: 0 };
                 }).filter(m => m !== null);
 
-                if (members.length !== memberRows.length) return; // 不正な入力があれば処理を中断
+                if (members.length !== memberRows.length) return;
 
-                // 2. 合計金額と平均金額を計算
                 const totalPaid = members.reduce((sum, member) => sum + member.paid, 0);
                 const averageShare = totalPaid / members.length;
                 
                 totalSummary.innerHTML = `**合計支払額:** ${totalPaid.toLocaleString()} 円 / **一人あたり:** ${averageShare.toFixed(2).toLocaleString()} 円`;
 
-                // 3. 各人の過不足額（貸し/借り）を計算
-                // balance > 0 : 貸し（多く払った人 = 受け取る人）
-                // balance < 0 : 借り（少なく払った人 = 支払う人）
                 members.forEach(member => {
-                    // toFixed(2) で小数点以下2桁に丸めてから、Number() で数値に戻す
                     member.balance = Number((member.paid - averageShare).toFixed(2));
                 });
                 
                 // バランスサマリーの表示
+                balanceSummaryList.innerHTML = '';
                 members.forEach(member => {
                     const li = document.createElement('li');
                     const balance = member.balance;
-                    if (balance > 0.01) { // 貸し
-                        li.className = 'balance-positive';
-                        li.textContent = `${member.name}: ${balance.toLocaleString()} 円の**貸し** (受け取り)`;
-                    } else if (balance < -0.01) { // 借り
-                        li.className = 'balance-negative';
-                        li.textContent = `${member.name}: ${Math.abs(balance).toLocaleString()} 円の**借り** (支払い)`;
-                    } else { // ほぼ清算済み
-                        li.textContent = `${member.name}: 清算済み`;
-                    }
+                    if (balance > 0.01) { li.className = 'balance-positive'; li.textContent = `${member.name}: ${balance.toLocaleString()} 円の**貸し** (受け取り)`; } 
+                    else if (balance < -0.01) { li.className = 'balance-negative'; li.textContent = `${member.name}: ${Math.abs(balance).toLocaleString()} 円の**借り** (支払い)`; } 
+                    else { li.textContent = `${member.name}: 清算済み`; }
                     balanceSummaryList.appendChild(li);
                 });
 
-                // 4. 清算の実行（最小取引アルゴリズム）
-                // 支払いが必要な人（借り）と受け取るべき人（貸し）を分ける
+                // 清算の実行（最小取引アルゴリズム）
                 let debtors = members.filter(m => m.balance < -0.01).map(m => ({ ...m, owes: Math.abs(m.balance) }));
                 let creditors = members.filter(m => m.balance > 0.01).map(m => ({ ...m, gets: m.balance }));
-
-                // 借りている額が大きい順、またはランダムで並び替えても良い
                 debtors.sort((a, b) => b.owes - a.owes); 
                 creditors.sort((a, b) => b.gets - a.gets);
 
-                let transactionList = [];
                 let dIndex = 0;
                 let cIndex = 0;
 
                 while (dIndex < debtors.length && cIndex < creditors.length) {
                     const debtor = debtors[dIndex];
                     const creditor = creditors[cIndex];
-
-                    // 支払うべき額と受け取るべき額の小さい方を取引額とする
                     const amountToTransfer = Math.min(debtor.owes, creditor.gets);
                     
                     if (amountToTransfer > 0.01) {
-                        transactionList.push({
+                        currentTransactions.push({
                             payer: debtor.name,
                             recipient: creditor.name,
-                            amount: Number(amountToTransfer.toFixed(2)) // 小数点2桁に丸める
+                            amount: Number(amountToTransfer.toFixed(2)),
+                            isPaid: false,      // 新規追加
+                            paidDate: null      // 新規追加
                         });
 
-                        // 残額を更新
                         debtor.owes -= amountToTransfer;
                         creditor.gets -= amountToTransfer;
                     }
 
-                    // 支払うべき額がなくなった/受け取るべき額がなくなった人を次のインデックスへ
-                    if (debtor.owes < 0.01) {
-                        dIndex++;
-                    }
-                    if (creditor.gets < 0.01) {
-                        cIndex++;
-                    }
+                    if (debtor.owes < 0.01) { dIndex++; }
+                    if (creditor.gets < 0.01) { cIndex++; }
                 }
                 
-                // 5. 最終的な清算結果の表示
-                if (transactionList.length === 0 && totalPaid > 0) {
-                    const li = document.createElement('li');
-                    li.textContent = '全員のバランスが取れています。清算は不要です。';
-                    settlementResultList.appendChild(li);
-                } else if (transactionList.length === 0 && totalPaid === 0) {
-                    const li = document.createElement('li');
-                    li.textContent = '支払いが行われていません。';
-                    settlementResultList.appendChild(li);
-                } else {
-                    transactionList.forEach(t => {
-                        const li = document.createElement('li');
-                        li.textContent = `${t.payer} が ${t.recipient} に ${t.amount.toLocaleString()} 円 支払う`;
-                        settlementResultList.appendChild(li);
-                    });
-                }
+                // 清算結果の描画
+                renderSettlementList();
             }
+
+            // 清算リストの描画処理
+            function renderSettlementList() {
+                settlementResultList.innerHTML = '';
+                const deadlineDate = deadlineInput.value ? new Date(deadlineInput.value) : null;
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+
+                if (currentTransactions.length === 0) {
+                    const li = document.createElement('li');
+                    li.textContent = '清算は不要です。';
+                    li.style.borderLeftColor = '#aaa';
+                    settlementResultList.appendChild(li);
+                    return;
+                }
+
+                currentTransactions.forEach((t, index) => {
+                    const li = document.createElement('li');
+                    
+                    // スタイルクラスの設定
+                    li.classList.remove('paid-item', 'overdue-item');
+                    if (t.isPaid) {
+                        li.classList.add('paid-item');
+                    } else if (deadlineDate && deadlineDate < today) {
+                        li.classList.add('overdue-item');
+                    }
+
+                    // メインの取引情報
+                    const mainText = document.createElement('span');
+                    mainText.textContent = `${t.payer} が ${t.recipient} に ${t.amount.toLocaleString()} 円 支払う`;
+                    li.appendChild(mainText);
+
+                    // 支払い追跡の詳細
+                    const details = document.createElement('div');
+                    details.className = 'payment-details';
+                    
+                    // 支払い済みチェックボックス
+                    details.innerHTML += `
+                        <label>
+                            <input type="checkbox" onchange="updatePaymentStatus(${index}, this)" ${t.isPaid ? 'checked' : ''}>
+                            支払済
+                        </label>
+                    `;
+
+                    // 支払日入力
+                    const paidDateInput = document.createElement('input');
+                    paidDateInput.type = 'date';
+                    paidDateInput.className = 'paid-date';
+                    paidDateInput.value = t.paidDate || '';
+                    paidDateInput.disabled = !t.isPaid;
+                    paidDateInput.setAttribute('onchange', `recordPaidDate(${index}, this)`);
+
+                    details.appendChild(paidDateInput);
+                    li.appendChild(details);
+                    settlementResultList.appendChild(li);
+                });
+            }
+
+            // 初期化時に期日ステータスをチェック
+            updateDeadlineStatus();
         });
     </script>
 </body>
